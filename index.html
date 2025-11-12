@@ -187,8 +187,8 @@
             position: absolute;
             bottom: 0;
             right: 0;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: #3b82f6;
             border: none;
@@ -197,6 +197,7 @@
             justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
+            z-index: 10;
         }
 
         .upload-button:hover {
@@ -204,8 +205,8 @@
         }
 
         .upload-button svg {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             stroke: white;
             stroke-width: 2;
             fill: none;
@@ -389,6 +390,140 @@
             margin-bottom: 24px;
         }
 
+        .payment-details-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .payment-details-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .payment-details-button:active {
+            transform: translateY(0);
+        }
+
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 39, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .payment-modal.active {
+            display: flex;
+        }
+
+        .payment-modal-content {
+            background: #0f1629;
+            border: 1px solid #1e293b;
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            padding: 40px;
+        }
+
+        .payment-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            background: rgba(30, 41, 59, 0.5);
+            border: none;
+            border-radius: 50%;
+            color: #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .payment-modal-close:hover {
+            background: rgba(30, 41, 59, 0.8);
+            transform: rotate(90deg);
+        }
+
+        .payment-modal-close svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .submit-receipt-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .submit-receipt-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-receipt-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #receiptUploadArea:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .receipt-processing-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 39, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+
+        .receipt-processing-modal.active {
+            display: flex;
+        }
+
+        .receipt-processing-content {
+            background: #0f1629;
+            border: 1px solid #1e293b;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 100%;
+            padding: 48px;
+            text-align: center;
+        }
+
         .posts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -403,6 +538,23 @@
             overflow: hidden;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
+        }
+        
+        .post-id {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(15, 22, 41, 0.8);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            z-index: 5;
         }
 
         .post-card:hover {
@@ -460,9 +612,62 @@
         }
 
         .post-amount {
-            color: #3b82f6;
-            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-left: 3px solid #3b82f6;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .post-amount::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--progress-width, 0%);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        
+        .post-amount-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .post-amount-collected {
+            color: #10b981;
+            font-size: 16px;
             font-weight: 700;
+        }
+        
+        .post-amount-separator {
+            color: #64748b;
+            font-size: 14px;
+            margin: 0 8px;
+        }
+        
+        .post-amount-target {
+            color: #3b82f6;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .post-amount-currency {
+            color: #8b5cf6;
+            font-size: 14px;
+            margin-left: 4px;
         }
 
         .post-detail {
@@ -493,6 +698,22 @@
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
+        }
+        
+        .detail-post-id {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(15, 22, 41, 0.9);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            z-index: 10;
         }
 
         .post-detail-header {
@@ -598,6 +819,12 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            gap: 16px;
+        }
+        
+        .info-row .amount-display {
+            flex: 1;
+            min-width: 200px;
         }
 
         .info-row:last-child {
@@ -616,104 +843,92 @@
         }
 
         .amount-display {
-            color: #3b82f6;
-            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border: 2px solid rgba(59, 130, 246, 0.4);
+            border-left: 4px solid #3b82f6;
+            border-radius: 12px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .amount-display::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--progress-width, 0%);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.4) 0%, rgba(139, 92, 246, 0.4) 100%);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        
+        .amount-display-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .amount-display-collected {
+            color: #10b981;
+            font-size: 24px;
             font-weight: 700;
         }
-
-        .donation-section {
-            background: rgba(30, 41, 59, 0.3);
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 24px;
-        }
-
-        .donation-title {
-            color: #f1f5f9;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .slider-container {
-            margin-bottom: 20px;
-        }
-
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-
-        .slider-label span {
+        
+        .amount-display-separator {
             color: #64748b;
+            font-size: 20px;
+            margin: 0 12px;
+        }
+        
+        .amount-display-target {
+            color: #3b82f6;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .amount-display-currency {
+            color: #8b5cf6;
+            font-size: 20px;
+            margin-left: 6px;
+        }
+        
+        .user-post-amount-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-left: 3px solid #3b82f6;
+            border-radius: 8px;
+            padding: 6px 14px;
+            color: #3b82f6;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        
+        .user-post-amount-badge::before {
+            content: 'Цель: ';
+            color: #64748b;
+            font-weight: 500;
             font-size: 13px;
         }
-
-        .slider-value {
-            color: #3b82f6;
-            font-size: 20px;
-            font-weight: 700;
+        
+        .user-post-amount-badge::after {
+            content: ' ₽';
+            color: #8b5cf6;
+            font-size: 14px;
+            margin-left: 2px;
         }
 
-        .slider {
-            width: 100%;
-            height: 8px;
-            background: #1e293b;
-            border-radius: 8px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #3b82f6;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-            background: #2563eb;
-            transform: scale(1.1);
-        }
-
-        .slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            background: #3b82f6;
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .slider::-moz-range-thumb:hover {
-            background: #2563eb;
-            transform: scale(1.1);
-        }
-
-        .donate-button {
-            width: 100%;
-            height: 48px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .donate-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-        }
 
         .back-button {
             display: inline-flex;
@@ -739,65 +954,6 @@
             fill: none;
         }
 
-        .receipt-upload {
-            display: none;
-            background: rgba(30, 41, 59, 0.3);
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 24px;
-        }
-
-        .receipt-upload.active {
-            display: block;
-        }
-
-        .upload-area {
-            border: 2px dashed #334155;
-            border-radius: 12px;
-            padding: 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 16px;
-        }
-
-        .upload-area:hover {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .upload-area svg {
-            width: 48px;
-            height: 48px;
-            stroke: #64748b;
-            stroke-width: 2;
-            fill: none;
-            margin: 0 auto 16px;
-        }
-
-        .upload-text {
-            color: #f1f5f9;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .upload-hint {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .receipt-preview {
-            max-width: 100%;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            display: none;
-        }
-
-        .receipt-preview.active {
-            display: block;
-        }
 
         .chats-list {
             display: flex;
@@ -2220,7 +2376,6 @@
         .rule-card,
         .leaderboard-item,
         .upload-button,
-        .donate-button,
         .submit-button,
         .support-btn,
         .chat-send-btn,
@@ -2413,12 +2568,14 @@
                 </div>
 
                 <div id="postsList" style="display: none;">
-                    <div class="back-button" id="backToButtons">
-                        <svg viewBox="0 0 24 24">
-                            <line x1="19" y1="12" x2="5" y2="12"></line>
-                            <polyline points="12 19 5 12 12 5"></polyline>
-                        </svg>
-                        Назад
+                    <div style="display: flex; justify-content: center; margin-bottom: 32px;">
+                        <button id="paymentDetailsBtn" class="payment-details-button">
+                            <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none;">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                            </svg>
+                            Реквизиты для помощи
+                        </button>
                     </div>
                     <div class="posts-grid" id="postsContainer"></div>
                 </div>
@@ -2444,12 +2601,13 @@
                                 <div class="progress-bar" style="width: 100%; height: 10px; background: rgba(30, 41, 59, 0.5); border-radius: 5px; overflow: hidden; margin-bottom: 8px;">
                                     <div class="progress-fill" id="userPostProgress" style="height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.3s; border-radius: 5px;"></div>
                                 </div>
-                                <div class="progress-text" style="display: flex; justify-content: space-between; font-size: 14px; color: #64748b;">
-                                    <span id="userPostCollected">Собрано: 0 ₽</span>
-                                    <span id="userPostAmount">Цель: 0 ₽</span>
+                                <div class="progress-text" style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #64748b; margin-top: 12px;">
+                                    <span id="userPostCollected">Собрано: <span style="color: #10b981; font-weight: 600;">0 ₽</span></span>
+                                    <span id="userPostAmount" class="user-post-amount-badge"></span>
                                 </div>
                             </div>
                             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(51, 65, 85, 0.5);">
+                                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;"><strong style="color: #e2e8f0;">Получатель:</strong> <span id="userPostRecipient"></span></p>
                                 <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;"><strong style="color: #e2e8f0;">Банк:</strong> <span id="userPostBank"></span></p>
                                 <p style="color: #94a3b8; font-size: 14px;"><strong style="color: #e2e8f0;">Телефон:</strong> <span id="userPostPhone"></span></p>
                             </div>
@@ -2875,6 +3033,103 @@
         </div>
     </div>
 
+    <!-- Payment Details Modal -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-modal-content">
+            <button class="payment-modal-close" id="closePaymentModal">
+                <svg viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h2 style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-bottom: 24px; text-align: center;">Реквизиты для помощи</h2>
+            
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="color: #f1f5f9; font-size: 18px; font-weight: 600; margin-bottom: 16px;">Инструкция по переводу</h3>
+                <div style="color: #94a3b8; font-size: 14px; line-height: 1.8;">
+                    <p style="margin-bottom: 12px;">Для того чтобы помочь нуждающемуся, выполните следующие шаги:</p>
+                    <ol style="margin-left: 20px; margin-bottom: 12px;">
+                        <li style="margin-bottom: 8px;">Откройте приложение вашего банка или перейдите на сайт банка</li>
+                        <li style="margin-bottom: 8px;">Выберите операцию "Перевод" или "Платеж"</li>
+                        <li style="margin-bottom: 8px;">Введите лицевой счет получателя (указан ниже)</li>
+                        <li style="margin-bottom: 8px;">Укажите сумму перевода</li>
+                        <li style="margin-bottom: 8px;"><strong style="color: #3b82f6;">Обязательно укажите в комментарии к переводу ID поста</strong> (ID указан справа вверху на карточке поста)</li>
+                        <li style="margin-bottom: 8px;">Проверьте данные и подтвердите перевод</li>
+                    </ol>
+                    <p style="color: #fbbf24; font-weight: 600; margin-top: 16px;">⚠️ Важно: Без указания ID поста в комментарии мы не сможем определить, кому именно предназначена помощь!</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="color: #f1f5f9; font-size: 18px; font-weight: 600; margin-bottom: 16px;">Реквизиты получателя</h3>
+                <div style="color: #94a3b8; font-size: 14px; line-height: 1.8;">
+                    <p style="margin-bottom: 12px;"><strong style="color: #f1f5f9;">Получатель:</strong> ООО "Max"</p>
+                    <p style="margin-bottom: 12px;"><strong style="color: #f1f5f9;">ИНН:</strong> 7707083893</p>
+                    <p style="margin-bottom: 12px;"><strong style="color: #f1f5f9;">КПП:</strong> 770701001</p>
+                    <p style="margin-bottom: 12px;"><strong style="color: #f1f5f9;">Банк:</strong> ПАО "Сбербанк"</p>
+                    <p style="margin-bottom: 12px;"><strong style="color: #f1f5f9;">БИК:</strong> 044525225</p>
+                    <p style="margin-bottom: 12px;"><strong style="color: #f1f5f9;">Корр. счет:</strong> 30101810400000000225</p>
+                    <p style="margin-bottom: 0;"><strong style="color: #3b82f6; font-size: 16px;">Лицевой счет:</strong> <span id="accountNumber" style="color: #3b82f6; font-size: 18px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 1px;">40817810099910004312</span></p>
+                </div>
+            </div>
+
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
+                <h3 style="color: #f1f5f9; font-size: 18px; font-weight: 600; margin-bottom: 16px;">QR-код для быстрого перевода</h3>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">Отсканируйте QR-код в приложении вашего банка для быстрого перевода</p>
+                <div id="qrCodeContainer" style="display: flex; justify-content: center; align-items: center; background: white; padding: 20px; border-radius: 12px; margin: 0 auto; width: fit-content;">
+                    <img src="http://qrcoder.ru/code/?%CF%EE%EB%F3%F7%E0%F2%E5%EB%FC%3A+%CE%CE%CE+%22%CC%E0%EA%F1%22%0D%0A%0D%0A%C8%CD%CD%3A+7707083893%0D%0A%0D%0A%CA%CF%CF%3A+770701001%0D%0A%0D%0A%C1%E0%ED%EA%3A+%CF%C0%CE+%22%D1%E1%E5%F0%E1%E0%ED%EA%22%0D%0A%0D%0A%C1%C8%CA%3A+044525225%0D%0A%0D%0A%CA%EE%F0%F0.+%F1%F7%E5%F2%3A+30101810400000000225%0D%0A%0D%0A%CB%E8%F6%E5%E2%EE%E9+%F1%F7%E5%F2%3A+40817810099910004312&4&0" width="276" height="276" border="0" alt="QR код для перевода" style="display: block;">
+                </div>
+            </div>
+
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; padding: 20px;">
+                <h3 style="color: #f1f5f9; font-size: 18px; font-weight: 600; margin-bottom: 16px;">Загрузка чека о переводе</h3>
+                <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+                    После совершения перевода, пожалуйста, загрузите чек или скриншот операции для подтверждения платежа. 
+                    Это поможет нам быстрее обработать ваше пожертвование и направить средства нуждающемуся.
+                </p>
+                <div style="background: rgba(15, 22, 41, 0.5); border: 1px solid #334155; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                    <p style="color: #64748b; font-size: 12px; margin-bottom: 8px;"><strong style="color: #f1f5f9;">Доступные форматы:</strong> JPG, PNG, PDF</p>
+                    <p style="color: #64748b; font-size: 12px; margin-bottom: 0;"><strong style="color: #f1f5f9;">Максимальный размер файла:</strong> 10 МБ</p>
+                </div>
+                <div style="border: 2px dashed #334155; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px;" id="receiptUploadArea">
+                    <input type="file" id="receiptFileInput" accept="image/jpeg,image/png,image/jpg,application/pdf" style="display: none;">
+                    <svg style="width: 48px; height: 48px; stroke: #64748b; margin: 0 auto 12px;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p style="color: #f1f5f9; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Нажмите для загрузки чека</p>
+                    <p style="color: #64748b; font-size: 12px;">или перетащите файл сюда</p>
+                    <p id="receiptFileName" style="color: #3b82f6; font-size: 13px; margin-top: 8px; display: none;"></p>
+                </div>
+                <button id="submitReceiptBtn" class="submit-receipt-button" style="width: 100%; height: 48px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: none;">
+                    Отправить чек
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Processing Modal -->
+    <div class="receipt-processing-modal" id="receiptProcessingModal">
+        <div class="receipt-processing-content">
+            <div style="width: 80px; height: 80px; border: 4px solid #334155; border-top-color: #3b82f6; border-radius: 50%; margin: 0 auto 24px; animation: spin 1s linear infinite;"></div>
+            <style>
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            </style>
+            <h2 style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-bottom: 12px; text-align: center;">Обработка чека</h2>
+            <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 24px; text-align: center;">
+                Мы обрабатываем ваш чек о переводе. Это может занять некоторое время. 
+                Вы получите уведомление, когда обработка будет завершена.
+            </p>
+            <p style="color: #3b82f6; font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 24px;">Обычно обработка занимает 2-5 минут</p>
+            <button id="closeReceiptProcessingModal" style="width: 100%; height: 48px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                OK
+            </button>
+        </div>
+    </div>
+
     <!-- Post detail modal -->
     <div class="post-detail" id="postDetail">
         <div class="post-detail-content">
@@ -2901,58 +3156,9 @@
                 <p class="post-detail-description" id="detailDescription"></p>
                 
                 <div class="post-detail-info">
-                    <div class="info-row">
-                        <span class="info-label">Необходимая сумма:</span>
-                        <span class="amount-display" id="detailAmount"></span>
+                        <div class="amount-display" id="detailAmount" style="--progress-width: 0%"></div>
                     </div>
-                    <!-- Adding recipient and bank info -->
-                    <div class="info-row">
-                        <span class="info-label">Получатель:</span>
-                        <span class="info-value" id="detailRecipient"></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Банк:</span>
-                        <span class="info-value" id="detailBank"></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Номер телефона:</span>
-                        <span class="info-value" id="detailPhone"></span>
-                    </div>
-                </div>
-
-                <div class="donation-section">
-                    <h3 class="donation-title">Ваше пожертвование</h3>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Сумма пожертвования</span>
-                            <span class="slider-value" id="detailDonationValue">0 ₽</span>
-                        </div>
-                        <input type="range" min="0" max="50000" value="0" class="slider" id="detailDonationSlider">
-                    </div>
-                    <button class="donate-button" id="detailDonateBtn">Помочь</button>
-                </div>
-
-                <!-- Adding receipt upload section -->
-                <div class="receipt-upload" id="receiptUpload">
-                    <h3 class="donation-title">Загрузите чек о переводе</h3>
-                    <div class="upload-area" id="uploadArea">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <p class="upload-text">Нажмите для загрузки чека</p>
-                        <p class="upload-hint">PNG, JPG, PDF до 10MB</p>
-                    </div>
-                    <img src="/placeholder.svg" alt="Receipt preview" class="receipt-preview" id="receiptPreview">
-                    <input type="file" id="receiptInput" accept="image/*,.pdf" style="display: none;">
-                    <button class="submit-button" id="submitReceipt" style="display: none;">Отправить на проверку</button>
-                </div>
-
-                <!-- Adding chat button -->
-                <button class="chat-button" id="openChatBtn">
-                    💬 Открыть чат с получателем
-                </button>
+                <div class="detail-post-id" id="detailPostId"></div>
             </div>
         </div>
     </div>
@@ -3004,6 +3210,9 @@
         </div>
     </div>
 
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             function getFromLocalStorage(key) {
@@ -3299,6 +3508,161 @@
             needHelpBtn.addEventListener('click', () => {
                 openVerificationForm();
             });
+
+            // Обработчик кнопки "Реквизиты для помощи"
+            const paymentDetailsBtn = document.getElementById('paymentDetailsBtn');
+            const paymentModal = document.getElementById('paymentModal');
+            const closePaymentModal = document.getElementById('closePaymentModal');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+
+            // Открытие модального окна
+            if (paymentDetailsBtn) {
+                paymentDetailsBtn.addEventListener('click', () => {
+                    paymentModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            // Закрытие модального окна
+            if (closePaymentModal) {
+                closePaymentModal.addEventListener('click', () => {
+                    paymentModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+            }
+
+            // Закрытие при клике вне модального окна
+            if (paymentModal) {
+                paymentModal.addEventListener('click', (e) => {
+                    if (e.target === paymentModal) {
+                        paymentModal.classList.remove('active');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+
+            // Обработка загрузки чека
+            const receiptFileInput = document.getElementById('receiptFileInput');
+            const receiptUploadArea = document.getElementById('receiptUploadArea');
+            const receiptFileName = document.getElementById('receiptFileName');
+            const submitReceiptBtn = document.getElementById('submitReceiptBtn');
+            const receiptProcessingModal = document.getElementById('receiptProcessingModal');
+            const closeReceiptProcessingModal = document.getElementById('closeReceiptProcessingModal');
+
+            // Клик на область загрузки
+            if (receiptUploadArea && receiptFileInput) {
+                receiptUploadArea.addEventListener('click', () => {
+                    receiptFileInput.click();
+                });
+
+                // Обработка выбора файла
+                receiptFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Проверка размера файла (10 МБ = 10 * 1024 * 1024 байт)
+                        const maxSize = 10 * 1024 * 1024;
+                        if (file.size > maxSize) {
+                            alert('Размер файла превышает 10 МБ. Пожалуйста, выберите файл меньшего размера.');
+                            receiptFileInput.value = '';
+                            return;
+                        }
+
+                        // Проверка формата
+                        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+                        if (!allowedTypes.includes(file.type)) {
+                            alert('Неподдерживаемый формат файла. Пожалуйста, выберите JPG, PNG или PDF.');
+                            receiptFileInput.value = '';
+                            return;
+                        }
+
+                        // Показываем имя файла
+                        receiptFileName.textContent = `Выбран файл: ${file.name}`;
+                        receiptFileName.style.display = 'block';
+                        
+                        // Показываем кнопку отправки
+                        submitReceiptBtn.style.display = 'block';
+                    }
+                });
+
+                // Drag and drop
+                receiptUploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    receiptUploadArea.style.borderColor = '#3b82f6';
+                    receiptUploadArea.style.background = 'rgba(59, 130, 246, 0.1)';
+                });
+
+                receiptUploadArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    receiptUploadArea.style.borderColor = '#334155';
+                    receiptUploadArea.style.background = 'transparent';
+                });
+
+                receiptUploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    receiptUploadArea.style.borderColor = '#334155';
+                    receiptUploadArea.style.background = 'transparent';
+                    
+                    const file = e.dataTransfer.files[0];
+                    if (file) {
+                        // Проверка размера
+                        const maxSize = 10 * 1024 * 1024;
+                        if (file.size > maxSize) {
+                            alert('Размер файла превышает 10 МБ. Пожалуйста, выберите файл меньшего размера.');
+                            return;
+                        }
+
+                        // Проверка формата
+                        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+                        if (!allowedTypes.includes(file.type)) {
+                            alert('Неподдерживаемый формат файла. Пожалуйста, выберите JPG, PNG или PDF.');
+                            return;
+                        }
+
+                        // Устанавливаем файл в input
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        receiptFileInput.files = dataTransfer.files;
+
+                        // Показываем имя файла
+                        receiptFileName.textContent = `Выбран файл: ${file.name}`;
+                        receiptFileName.style.display = 'block';
+                        
+                        // Показываем кнопку отправки
+                        submitReceiptBtn.style.display = 'block';
+                    }
+                });
+            }
+
+            // Отправка чека
+            if (submitReceiptBtn) {
+                submitReceiptBtn.addEventListener('click', () => {
+                    const file = receiptFileInput.files[0];
+                    if (!file) {
+                        alert('Пожалуйста, выберите файл чека');
+                        return;
+                    }
+
+                    // Закрываем модальное окно с реквизитами
+                    paymentModal.classList.remove('active');
+                    
+                    // Показываем модальное окно обработки
+                    receiptProcessingModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Сбрасываем форму
+                    receiptFileInput.value = '';
+                    receiptFileName.style.display = 'none';
+                    submitReceiptBtn.style.display = 'none';
+                });
+            }
+
+            // Закрытие модального окна обработки чека
+            if (closeReceiptProcessingModal) {
+                closeReceiptProcessingModal.addEventListener('click', () => {
+                    receiptProcessingModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+            }
             
             function openVerificationForm() {
                 const modal = document.createElement('div');
@@ -3678,6 +4042,61 @@
                     showPostCreationForm();
                 }, 3000);
             }
+            
+            
+            function showPostCreatedSuccess(onComplete) {
+                const modal = document.createElement('div');
+                modal.id = 'postCreatedModal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(10, 14, 39, 0.95);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    padding: 20px;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #0f1629; border: 1px solid #1e293b; border-radius: 24px; max-width: 500px; width: 100%; padding: 48px; text-align: center;">
+                        <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                            <svg style="width: 32px; height: 32px; stroke: #10b981;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <h2 style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-bottom: 12px;">Пост успешно создан!</h2>
+                        <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+                            Ваш пост создан и готов к просмотру. Теперь другие пользователи смогут увидеть вашу ситуацию и помочь вам.
+                        </p>
+                        <button id="closePostCreatedModal" style="width: 100%; height: 48px; background: #3b82f6; border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+                            Понятно
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                const closeBtn = document.getElementById('closePostCreatedModal');
+                closeBtn.addEventListener('click', () => {
+                    modal.remove();
+                    if (onComplete) {
+                        onComplete();
+                    }
+                });
+                
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                        if (onComplete) {
+                            onComplete();
+                        }
+                    }
+                });
+            }
 
             helperForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -3691,16 +4110,23 @@
                 showHelperTabs();
             });
 
-            backToButtons.addEventListener('click', () => {
-                postsList.style.display = 'none';
-                charityInitial.style.display = 'block';
-            });
+
+            // Функция для генерации уникального 5-значного ID
+            function generatePostId(postId) {
+                // Генерируем уникальный 5-значный номер на основе id поста
+                // Используем формулу для получения чисел от 10000 до 99999
+                const base = 10000;
+                const multiplier = 1237; // Простое число для более случайного вида
+                const uniqueId = base + ((postId * multiplier) % 90000);
+                return String(uniqueId).padStart(5, '0');
+            }
 
             function renderPosts() {
                 postsContainer.innerHTML = '';
                 charityPosts.forEach(post => {
                     const postCard = document.createElement('div');
                     postCard.className = 'post-card';
+                    const uniqueId = generatePostId(post.id);
                     postCard.innerHTML = `
                         <img src="${post.image}" alt="${post.title}" class="post-image">
                         <div class="post-content">
@@ -3711,8 +4137,14 @@
                                 </div>
                             </div>
                             <h3 class="post-title">${post.title}</h3>
-                            <p class="post-amount">${post.amount.toLocaleString('ru-RU')} ₽</p>
+                            <div class="post-amount" style="--progress-width: ${((post.collected || 0) / post.amount * 100)}%">
+                                <div class="post-amount-content">
+                                    <span class="post-amount-collected">${(post.collected || 0).toLocaleString('ru-RU')}<span class="post-amount-currency">₽</span></span>
+                                    <span class="post-amount-target">${post.amount.toLocaleString('ru-RU')}<span class="post-amount-currency">₽</span></span>
+                                </div>
+                            </div>
                         </div>
+                        <div class="post-id">ID: ${uniqueId}</div>
                     `;
                     postCard.addEventListener('click', () => openPostDetail(post));
                     postsContainer.appendChild(postCard);
@@ -3726,29 +4158,18 @@
                 document.getElementById('detailAuthorName').textContent = post.authorName;
                 document.getElementById('detailTitle').textContent = post.title;
                 document.getElementById('detailDescription').textContent = post.description;
-                document.getElementById('detailAmount').textContent = post.amount.toLocaleString('ru-RU') + ' ₽';
-                document.getElementById('detailRecipient').textContent = post.recipient;
-                document.getElementById('detailBank').textContent = post.bank;
-                document.getElementById('detailPhone').textContent = post.phone; // Changed to phone
-                
-                const detailSlider = document.getElementById('detailDonationSlider');
-                detailSlider.max = post.amount;
-                detailSlider.value = 0;
-                document.getElementById('detailDonationValue').textContent = '0 ₽';
-                
-                document.getElementById('receiptUpload').classList.remove('active');
-                document.getElementById('receiptPreview').classList.remove('active');
-                document.getElementById('submitReceipt').style.display = 'none';
-                
-                const donations = getFromLocalStorage('donations') || [];
-                const postDonations = donations.filter(d => d.postId === post.id);
-                const confirmedDonation = postDonations.find(d => d.confirmed);
-
-                if (confirmedDonation) {
-                    document.getElementById('openChatBtn').classList.add('active');
-                } else {
-                    document.getElementById('openChatBtn').classList.remove('active');
-                }
+                const collected = post.collected || 0;
+                const progress = post.amount > 0 ? (collected / post.amount * 100) : 0;
+                const detailAmountEl = document.getElementById('detailAmount');
+                detailAmountEl.style.setProperty('--progress-width', `${progress}%`);
+                detailAmountEl.innerHTML = `
+                    <div class="amount-display-content">
+                        <span class="amount-display-collected">${collected.toLocaleString('ru-RU')}<span class="amount-display-currency">₽</span></span>
+                        <span class="amount-display-target">${post.amount.toLocaleString('ru-RU')}<span class="amount-display-currency">₽</span></span>
+                    </div>
+                `;
+                const uniqueId = generatePostId(post.id);
+                document.getElementById('detailPostId').textContent = `ID: ${uniqueId}`;
                 
                 postDetail.classList.add('active');
                 document.body.style.overflow = 'hidden';
@@ -3768,73 +4189,7 @@
                 }
             });
 
-            const detailDonationSlider = document.getElementById('detailDonationSlider');
-            const detailDonationValue = document.getElementById('detailDonationValue');
 
-            detailDonationSlider.addEventListener('input', (e) => {
-                detailDonationValue.textContent = parseInt(e.target.value).toLocaleString('ru-RU') + ' ₽';
-            });
-
-            document.getElementById('detailDonateBtn').addEventListener('click', () => {
-                const amount = detailDonationSlider.value;
-                if (amount > 0) {
-                    const donations = getFromLocalStorage('donations') || [];
-                    const donation = {
-                        amount: parseInt(amount),
-                        date: new Date().toISOString(),
-                        postId: currentPost.id,
-                        confirmed: false,
-                        receipt: null
-                    };
-                    donations.push(donation);
-                    saveToLocalStorage('donations', donations);
-                    
-                    document.getElementById('receiptUpload').classList.add('active');
-                    alert(`Спасибо! Теперь загрузите чек о переводе ${parseInt(amount).toLocaleString('ru-RU')} ₽`);
-                } else {
-                    alert('Пожалуйста, выберите сумму пожертвования');
-                }
-            });
-
-            const uploadArea = document.getElementById('uploadArea');
-            const receiptInput = document.getElementById('receiptInput');
-            const receiptPreview = document.getElementById('receiptPreview');
-            const submitReceipt = document.getElementById('submitReceipt');
-
-            uploadArea.addEventListener('click', () => {
-                receiptInput.click();
-            });
-
-            receiptInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        receiptPreview.src = event.target.result;
-                        receiptPreview.classList.add('active');
-                        submitReceipt.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            submitReceipt.addEventListener('click', () => {
-                const donations = getFromLocalStorage('donations') || [];
-                const lastDonation = donations.find(d => d.postId === currentPost.id && !d.confirmed);
-                if (lastDonation) {
-                    lastDonation.receipt = receiptPreview.src;
-                    setTimeout(() => {
-                        lastDonation.confirmed = true;
-                        saveToLocalStorage('donations', donations);
-                        alert('Чек подтвержден! Теперь вы можете общаться с получателем в чате.');
-                        document.getElementById('openChatBtn').classList.add('active');
-                        document.getElementById('receiptUpload').classList.remove('active');
-                        confirmReceipt(currentPost.id);
-                    }, 2000);
-                    
-                    alert('Чек отправлен на проверку. Ожидайте подтверждения...');
-                }
-            });
 
             const chatsList = document.getElementById('chatsList');
             const emptyChats = document.getElementById('emptyChats');
@@ -4090,67 +4445,23 @@
                 document.getElementById('detailAuthorName').textContent = post.authorName;
                 document.getElementById('detailTitle').textContent = post.title;
                 document.getElementById('detailDescription').textContent = post.description;
-                document.getElementById('detailAmount').textContent = post.amount.toLocaleString('ru-RU') + ' ₽';
-                document.getElementById('detailRecipient').textContent = post.recipient;
-                document.getElementById('detailBank').textContent = post.bank;
-                document.getElementById('detailPhone').textContent = post.phone; // Changed to phone
-                
-                const detailSlider = document.getElementById('detailDonationSlider');
-                detailSlider.max = post.amount;
-                detailSlider.value = 0;
-                document.getElementById('detailDonationValue').textContent = '0 ₽';
-                
-                document.getElementById('receiptUpload').classList.remove('active');
-                document.getElementById('receiptPreview').classList.remove('active');
-                document.getElementById('submitReceipt').style.display = 'none';
-                
-                const donations = getFromLocalStorage('donations') || [];
-                const postDonations = donations.filter(d => d.postId === post.id);
-                const confirmedDonation = postDonations.find(d => d.confirmed);
-
-                if (confirmedDonation) {
-                    document.getElementById('openChatBtn').classList.add('active');
-                } else {
-                    document.getElementById('openChatBtn').classList.remove('active');
-                }
+                const collected = post.collected || 0;
+                const progress = post.amount > 0 ? (collected / post.amount * 100) : 0;
+                const detailAmountEl = document.getElementById('detailAmount');
+                detailAmountEl.style.setProperty('--progress-width', `${progress}%`);
+                detailAmountEl.innerHTML = `
+                    <div class="amount-display-content">
+                        <span class="amount-display-collected">${collected.toLocaleString('ru-RU')}<span class="amount-display-currency">₽</span></span>
+                        <span class="amount-display-target">${post.amount.toLocaleString('ru-RU')}<span class="amount-display-currency">₽</span></span>
+                    </div>
+                `;
+                const uniqueId = generatePostId(post.id);
+                document.getElementById('detailPostId').textContent = `ID: ${uniqueId}`;
                 
                 postDetail.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
 
-            // Event listener for opening chat from detail view
-            document.getElementById('openChatBtn').addEventListener('click', () => {
-                if (currentPost) {
-                    openChatInTab(currentPost);
-                }
-            });
-
-            // Function to confirm receipt and add to active chats
-            function confirmReceipt(postId) {
-                const activeChats = getFromLocalStorage('activeChats') || [];
-                if (!activeChats.find(chat => chat.postId === postId)) {
-                    activeChats.push({ postId: postId, startDate: new Date().toISOString() });
-                    saveToLocalStorage('activeChats', activeChats);
-                    
-                    // Initialize chat with welcome message
-                    const post = charityPosts.find(p => p.id === postId);
-                    if (post) {
-                        const messages = getFromLocalStorage(`chat_${postId}`) || [];
-                        if (messages.length === 0) {
-                            const now = new Date();
-                            messages.push({
-                                text: 'Здравствуйте! Спасибо большое за помощь! 🙏',
-                                time: formatMessageTime(now),
-                                timestamp: now.toISOString(),
-                                isOwn: false,
-                                read: false
-                            });
-                            saveToLocalStorage(`chat_${postId}`, messages);
-                        }
-                    }
-                    renderChatsList(); // Update the list of chats
-                }
-            }
 
             // Update notification badge on page load
             updateNotificationBadge();
@@ -4367,6 +4678,10 @@
                             </div>
                             
                             <form id="postCreationForm">
+                                <div id="formErrors" style="margin-bottom: 16px;">
+                                    <p id="avatarError" style="color: #ef4444; font-size: 12px; margin-top: 4px; margin-bottom: 8px; display: none;">⚠️ Необходимо загрузить фото пользователя в форме верификации</p>
+                                    <p id="ageError" style="color: #ef4444; font-size: 12px; margin-top: 4px; margin-bottom: 8px; display: none;">⚠️ Вам должно быть не менее 18 лет для создания поста</p>
+                                </div>
                                 <div style="margin-bottom: 24px;">
                                     <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 12px;">Фото/видео *</label>
                                     <div style="border: 2px dashed #334155; border-radius: 12px; padding: 32px; text-align: center; cursor: pointer;" id="mediaUploadArea">
@@ -4387,14 +4702,14 @@
                                 <div style="margin-bottom: 24px;">
                                     <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Название *</label>
                                     <input type="text" id="postTitle" required placeholder="Краткое название вашей ситуации" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px;">
-                                    <p id="titleError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Название должно начинаться с большой буквы и не содержать только цифры</p>
+                                    <p id="titleError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или название должно начинаться с большой буквы</p>
                                 </div>
                                 
                                 <div style="margin-bottom: 24px;">
                                     <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Описание *</label>
                                     <textarea id="postDescription" required placeholder="Подробно опишите вашу ситуацию..." maxlength="10000" style="width: 100%; min-height: 200px; padding: 12px 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
                                     <p style="color: #64748b; font-size: 12px; text-align: right; margin-top: 4px;"><span id="charCount">0</span> / 10 000</p>
-                                    <p id="descriptionError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Описание должно начинаться с большой буквы и содержать минимум 50 символов</p>
+                                    <p id="descriptionError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или описание должно содержать минимум 50 символов и начинаться с большой буквы</p>
                                 </div>
                                 
                                 <div style="margin-bottom: 24px;">
@@ -4403,21 +4718,28 @@
                                     <div style="margin-bottom: 16px;">
                                         <label style="display: block; color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Банк</label>
                                         <input type="text" id="postBank" required placeholder="Название банка" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px;">
-                                        <p id="bankError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Название банка должно начинаться с большой буквы</p>
+                                        <p id="bankError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или название банка должно начинаться с большой буквы</p>
                                     </div>
                                     
                                     <div style="margin-bottom: 16px;">
                                         <label style="display: block; color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Номер телефона</label>
                                         <input type="tel" id="postPhone" required placeholder="+7 (___) ___-__-__" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px;">
-                                        <p id="phoneError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Введите корректный номер телефона</p>
+                                        <p id="phoneError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или введите корректный номер телефона</p>
                                     </div>
                                 </div>
                                 
                                 <div style="margin-bottom: 24px;">
                                     <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Необходимая сумма (₽) *</label>
-                                    <input type="number" id="postAmount" required placeholder="0" min="1" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px;">
+                                    <input type="number" id="postAmount" required placeholder="0" min="1" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px; -moz-appearance: textfield;">
+                                    <style>
+                                        #postAmount::-webkit-outer-spin-button,
+                                        #postAmount::-webkit-inner-spin-button {
+                                            -webkit-appearance: none;
+                                            margin: 0;
+                                        }
+                                    </style>
                                     <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">⚠️ Сумму сбора нельзя будет изменить после создания</p>
-                                    <p id="amountError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Сумма должна быть положительным числом</p>
+                                    <p id="amountError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или сумма должна быть положительным числом</p>
                                 </div>
                                 
                                 <button type="submit" style="width: 100%; height: 48px; background: #3b82f6; border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: 600; cursor: pointer;">
@@ -4543,7 +4865,7 @@
                 // Validation functions
                 function validateTitle(title) {
                     if (!title || title.trim().length === 0) {
-                        return { valid: false, message: 'Название не может быть пустым' };
+                        return { valid: false, message: 'Поле не заполнено' };
                     }
                     if (!/^[А-ЯЁA-Z]/.test(title.trim())) {
                         return { valid: false, message: 'Название должно начинаться с большой буквы' };
@@ -4556,7 +4878,7 @@
                 
                 function validateDescription(description) {
                     if (!description || description.trim().length === 0) {
-                        return { valid: false, message: 'Описание не может быть пустым' };
+                        return { valid: false, message: 'Поле не заполнено' };
                     }
                     if (!/^[А-ЯЁA-Z]/.test(description.trim())) {
                         return { valid: false, message: 'Описание должно начинаться с большой буквы' };
@@ -4569,7 +4891,7 @@
                 
                 function validateBank(bank) {
                     if (!bank || bank.trim().length === 0) {
-                        return { valid: false, message: 'Название банка не может быть пустым' };
+                        return { valid: false, message: 'Поле не заполнено' };
                     }
                     if (!/^[А-ЯЁA-Z]/.test(bank.trim())) {
                         return { valid: false, message: 'Название банка должно начинаться с большой буквы' };
@@ -4578,6 +4900,9 @@
                 }
                 
                 function validatePhone(phone) {
+                    if (!phone || phone.trim().length === 0) {
+                        return { valid: false, message: 'Поле не заполнено' };
+                    }
                     const digits = phone.replace(/\D/g, '');
                     if (digits.length !== 11 || !digits.startsWith('7')) {
                         return { valid: false, message: 'Введите корректный номер телефона' };
@@ -4586,6 +4911,9 @@
                 }
                 
                 function validateAmount(amount) {
+                    if (!amount || amount.toString().trim().length === 0) {
+                        return { valid: false, message: 'Поле не заполнено' };
+                    }
                     const num = parseInt(amount);
                     if (isNaN(num) || num <= 0) {
                         return { valid: false, message: 'Сумма должна быть положительным числом' };
@@ -4659,8 +4987,96 @@
                     
                     // Hide all errors first
                     document.querySelectorAll('[id$="Error"]').forEach(el => {
-                        el.style.display = 'none';
+                        if (el.id !== 'avatarError' && el.id !== 'ageError') {
+                            el.style.display = 'none';
+                        }
                     });
+                    
+                    // Validate avatar and age first
+                    const verificationData = getFromLocalStorage('verificationData');
+                    if (!verificationData) {
+                        alert('Не найдены данные верификации. Пожалуйста, заполните форму проверки заново.');
+                        return;
+                    }
+
+                    // Получаем или создаем контейнер ошибок
+                    let formErrors = document.getElementById('formErrors');
+                    if (!formErrors) {
+                        formErrors = document.createElement('div');
+                        formErrors.id = 'formErrors';
+                        formErrors.style.cssText = 'margin-bottom: 16px;';
+                        const form = document.getElementById('postCreationForm');
+                        if (form) {
+                            form.insertBefore(formErrors, form.firstChild);
+                        }
+                    }
+
+                    // Получаем или создаем элементы ошибок
+                    let avatarErrorEl = document.getElementById('avatarError');
+                    if (!avatarErrorEl) {
+                        avatarErrorEl = document.createElement('p');
+                        avatarErrorEl.id = 'avatarError';
+                        avatarErrorEl.style.cssText = 'color: #ef4444; font-size: 12px; margin-top: 4px; margin-bottom: 8px; display: none;';
+                        avatarErrorEl.textContent = '⚠️ Необходимо загрузить фото пользователя в форме верификации';
+                        formErrors.appendChild(avatarErrorEl);
+                    }
+
+                    let ageErrorEl = document.getElementById('ageError');
+                    if (!ageErrorEl) {
+                        ageErrorEl = document.createElement('p');
+                        ageErrorEl.id = 'ageError';
+                        ageErrorEl.style.cssText = 'color: #ef4444; font-size: 12px; margin-top: 4px; margin-bottom: 8px; display: none;';
+                        ageErrorEl.textContent = '⚠️ Вам должно быть не менее 18 лет для создания поста';
+                        formErrors.appendChild(ageErrorEl);
+                    }
+
+                    // Скрываем ошибки
+                    avatarErrorEl.style.display = 'none';
+                    ageErrorEl.style.display = 'none';
+
+                    let errors = [];
+
+                    // Проверка возраста
+                    const birthDateStr = verificationData.birthDate;
+                    let ageValid = false;
+                    if (birthDateStr) {
+                        let birthDate;
+                        if (birthDateStr.includes('.')) {
+                            const parts = birthDateStr.split('.');
+                            birthDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                        } else {
+                            birthDate = new Date(birthDateStr);
+                        }
+
+                        if (!isNaN(birthDate.getTime())) {
+                            const today = new Date();
+                            let age = today.getFullYear() - birthDate.getFullYear();
+                            const m = today.getMonth() - birthDate.getMonth();
+                            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                age--;
+                            }
+                            if (age >= 18) {
+                                ageValid = true;
+                            }
+                        }
+                    }
+                    if (!ageValid) {
+                        errors.push('age');
+                        ageErrorEl.style.display = 'block';
+                    }
+
+                    // Проверка аватара
+                    const userPhoto = verificationData.userPhoto;
+                    if (!userPhoto || typeof userPhoto !== 'string' || userPhoto.trim() === '') {
+                        errors.push('avatar');
+                        avatarErrorEl.style.display = 'block';
+                    }
+
+                    // Если есть ошибки — прокрутка и остановка
+                    if (errors.length > 0) {
+                        formErrors.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        return;
+                    }
                     
                     // Validate media
                     const mediaElements = document.getElementById('mediaPreview').querySelectorAll('img, video');
@@ -4716,12 +5132,6 @@
                         document.getElementById('postAmount').style.borderColor = '#ef4444';
                         return;
                     }
-                    
-                    const verificationData = getFromLocalStorage('verificationData');
-                    if (!verificationData) {
-                        alert('Не найдены данные верификации. Пожалуйста, заполните форму проверки заново.');
-                        return;
-                    }
 
                     const firstName = verificationData.firstName || 'Пользователь';
                     const lastName = verificationData.lastName || '';
@@ -4748,16 +5158,17 @@
                     saveToLocalStorage('userPost', userPost);
                     modal.remove();
                     
-                    // Показываем созданный пост
-                    document.getElementById('charityInitial').style.display = 'none';
-                    document.getElementById('postsList').style.display = 'none';
-                    document.getElementById('userPostView').style.display = 'block';
-                    displayUserPost();
-                    
-                    // Показываем вкладки для нуждающегося (только Чаты)
-                    showNeedyTabs();
-                    
-                    alert('Ваш пост успешно создан!');
+                    // Показываем модальное окно успешного создания поста
+                    showPostCreatedSuccess(() => {
+                        // Показываем созданный пост
+                        document.getElementById('charityInitial').style.display = 'none';
+                        document.getElementById('postsList').style.display = 'none';
+                        document.getElementById('userPostView').style.display = 'block';
+                        displayUserPost();
+                        
+                        // Показываем вкладки для нуждающегося (только Чаты)
+                        showNeedyTabs();
+                    });
                 });
             }
             
@@ -4803,10 +5214,11 @@
                 document.getElementById('userPostAuthor').textContent = userPost.authorName || 'Пользователь';
                 document.getElementById('userPostTitle').textContent = userPost.title || '';
                 document.getElementById('userPostDescription').textContent = userPost.description || '';
+                document.getElementById('userPostRecipient').textContent = userPost.recipient || userPost.authorName || 'Пользователь';
                 document.getElementById('userPostBank').textContent = userPost.bank || '';
                 document.getElementById('userPostPhone').textContent = userPost.phone || '';
                 document.getElementById('userPostCollected').textContent = `Собрано: ${(userPost.collected || 0).toLocaleString('ru-RU')} ₽`;
-                document.getElementById('userPostAmount').textContent = `Цель: ${(userPost.amount || 0).toLocaleString('ru-RU')} ₽`;
+                document.getElementById('userPostAmount').textContent = (userPost.amount || 0).toLocaleString('ru-RU');
                 
                 const progress = userPost.amount > 0 ? ((userPost.collected || 0) / userPost.amount) * 100 : 0;
                 document.getElementById('userPostProgress').style.width = `${Math.min(progress, 100)}%`;
@@ -4906,7 +5318,7 @@
                 }
                 
                 // Find the closest interactive element
-                const target = e.target.closest('.nav-item, button, .post-card, .chat-item, .support-category, .support-solution, .rule-card, .leaderboard-item, .upload-button, .donate-button, .submit-button, .support-btn, .chat-send-btn, .support-chat-send-btn');
+                const target = e.target.closest('.nav-item, button, .post-card, .chat-item, .support-category, .support-solution, .rule-card, .leaderboard-item, .upload-button, .submit-button, .support-btn, .chat-send-btn, .support-chat-send-btn');
                 
                 if (!target || target.disabled) {
                     return;
