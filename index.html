@@ -5,20 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профиль - Форма регистрации</title>
     <style>
+        :root {
+            /* Темная тема (по умолчанию) */
+            --bg-primary: #0f1629;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-gradient-start: #0a0e27;
+            --bg-gradient-end: #1a1f3a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --border-color: #1e293b;
+            --border-color-light: #334155;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-theme {
+            /* Светлая тема - белый фон, максимально темные цвета для всего остального */
+            --bg-primary: #ffffff;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #ffffff;
+            --bg-gradient-start: #ffffff;
+            --bg-gradient-end: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #1e293b;
+            --text-tertiary: #334155;
+            --border-color: #cbd5e1;
+            --border-color-light: #e2e8f0;
+        }
+
+        /* Глобальные правила для светлой темы - переопределение всех светлых цветов на темные */
+        body.light-theme * {
+            color: inherit;
+        }
+
+        body.light-theme [style*="color: #f1f5f9"],
+        body.light-theme [style*="color:#f1f5f9"] {
+            color: #0f172a !important;
+        }
+
+        body.light-theme [style*="color: #94a3b8"],
+        body.light-theme [style*="color:#94a3b8"] {
+            color: #1e293b !important;
+        }
+
+        body.light-theme [style*="color: #64748b"],
+        body.light-theme [style*="color:#64748b"] {
+            color: #334155 !important;
+        }
+
+        body.light-theme [style*="color: #e2e8f0"],
+        body.light-theme [style*="color:#e2e8f0"] {
+            color: #1e293b !important;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            scrollbar-width: none;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            height: 0;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            display: block;
+            padding: 40px 20px;
+            transition: background 0.3s ease;
         }
 
         .container {
@@ -26,26 +87,30 @@
             gap: 24px;
             width: 100%;
             max-width: 1100px;
+            margin: 0 auto;
         }
 
         .sidebar {
-            background: #0f1629;
-            border: 1px solid #1e293b;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
             border-radius: 24px;
             padding: 32px 0;
             width: 280px;
             flex-shrink: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .sidebar-header {
             padding: 0 24px 24px;
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.3s ease;
         }
 
         .sidebar-title {
-            color: #f1f5f9;
+            color: var(--text-primary);
             font-size: 20px;
             font-weight: 700;
+            transition: color 0.3s ease;
         }
 
         .sidebar-nav {
@@ -62,7 +127,7 @@
             align-items: center;
             gap: 12px;
             padding: 12px 24px;
-            color: #94a3b8;
+            color: var(--text-secondary);
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
@@ -72,13 +137,13 @@
 
         .nav-item:hover {
             background: rgba(59, 130, 246, 0.05);
-            color: #e2e8f0;
+            color: var(--text-primary);
         }
 
         .nav-item.active {
             background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-            border-left-color: #3b82f6;
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
         }
 
         .nav-icon {
@@ -90,14 +155,14 @@
         }
 
         .card {
-            background: #0f1629;
-            border: 1px solid #1e293b;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
             border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 50px -12px var(--shadow);
             flex: 1;
             padding: 48px;
-            overflow-y: auto;
-            max-height: calc(100vh - 40px);
+            overflow: visible;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .content-section {
@@ -109,8 +174,85 @@
         }
 
         .header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+
+        .theme-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .theme-toggle-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .theme-toggle {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+            cursor: pointer;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .theme-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #334155;
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .theme-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .theme-toggle input:checked + .theme-toggle-slider {
+            background-color: #3b82f6;
+        }
+
+        .theme-toggle input:checked + .theme-toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .theme-toggle:hover .theme-toggle-slider {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .icon-wrapper {
@@ -133,16 +275,18 @@
         }
 
         h1 {
-            color: #f1f5f9;
+            color: var(--text-primary);
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
+            transition: color 0.3s ease;
         }
 
         .subtitle {
-            color: #64748b;
+            color: var(--text-tertiary);
             font-size: 14px;
+            transition: color 0.3s ease;
         }
 
         .photo-section {
@@ -150,7 +294,7 @@
             flex-direction: column;
             align-items: center;
             gap: 16px;
-            margin-bottom: 32px;
+            margin-bottom: 20px;
         }
 
         .photo-wrapper {
@@ -161,12 +305,13 @@
             width: 96px;
             height: 96px;
             border-radius: 50%;
-            background: #1e293b;
-            border: 2px solid #334155;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color-light);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .photo-preview img {
@@ -178,19 +323,52 @@
         .photo-preview svg {
             width: 40px;
             height: 40px;
-            stroke: #64748b;
+            stroke: var(--text-tertiary);
             stroke-width: 2;
             fill: none;
+            transition: stroke 0.3s ease;
+        }
+
+        /* Переопределение цветов stroke для светлой темы */
+        body.light-theme svg[stroke="#64748b"],
+        body.light-theme svg[stroke='#64748b'] {
+            stroke: #334155 !important;
+        }
+
+        body.light-theme svg[stroke="#475569"],
+        body.light-theme svg[stroke='#475569'] {
+            stroke: #1e293b !important;
+        }
+
+        body.light-theme svg[stroke="#94a3b8"],
+        body.light-theme svg[stroke='#94a3b8'] {
+            stroke: #1e293b !important;
+        }
+
+        body.light-theme [style*="stroke: #64748b"],
+        body.light-theme [style*="stroke:#64748b"] {
+            stroke: #334155 !important;
+        }
+
+        body.light-theme [style*="stroke: #475569"],
+        body.light-theme [style*="stroke:#475569"] {
+            stroke: #1e293b !important;
+        }
+
+        body.light-theme [style*="stroke: #94a3b8"],
+        body.light-theme [style*="stroke:#94a3b8"] {
+            stroke: #1e293b !important;
         }
 
         .upload-button {
             position: absolute;
-            bottom: 0;
+            bottom: 30px;
             right: 0;
+            transform: translateX(65px);
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #3b82f6;
+            background: var(--accent-color);
             border: none;
             display: flex;
             align-items: center;
@@ -201,7 +379,7 @@
         }
 
         .upload-button:hover {
-            background: #2563eb;
+            background: var(--accent-hover);
         }
 
         .upload-button svg {
@@ -218,11 +396,18 @@
 
         .photo-hint {
             font-size: 12px;
-            color: #64748b;
+            color: var(--text-tertiary);
+            text-align: center;
+            margin-top: -32px;
+            transition: color 0.3s ease;
         }
 
         .form-group {
             margin-bottom: 24px;
+        }
+
+        .form-group:first-of-type {
+            margin-top: -8px;
         }
 
         label {
@@ -244,10 +429,11 @@
             transform: translateY(-50%);
             width: 16px;
             height: 16px;
-            stroke: #64748b;
+            stroke: var(--text-tertiary);
             stroke-width: 2;
             fill: none;
             pointer-events: none;
+            transition: stroke 0.3s ease;
         }
 
         input {
@@ -255,28 +441,28 @@
             height: 44px;
             padding-left: 40px;
             padding-right: 16px;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid #334155;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color-light);
             border-radius: 12px;
-            color: #f1f5f9;
+            color: var(--text-primary);
             font-size: 14px;
             transition: all 0.2s;
         }
 
         input::placeholder {
-            color: #475569;
+            color: var(--text-secondary);
         }
 
         input:focus {
             outline: none;
-            border-color: #3b82f6;
-            background: rgba(30, 41, 59, 0.8);
+            border-color: var(--accent-color);
+            background: var(--bg-tertiary);
         }
 
         .submit-button {
             width: 100%;
             height: 44px;
-            background: #3b82f6;
+            background: var(--accent-color);
             border: none;
             border-radius: 12px;
             color: white;
@@ -288,7 +474,7 @@
         }
 
         .submit-button:hover {
-            background: #2563eb;
+            background: var(--accent-hover);
         }
 
         .footer {
@@ -298,8 +484,9 @@
 
         .footer-text {
             font-size: 12px;
-            color: #64748b;
+            color: var(--text-tertiary);
             line-height: 1.5;
+            transition: color 0.3s ease;
         }
 
         .empty-content {
@@ -311,22 +498,25 @@
             width: 64px;
             height: 64px;
             margin: 0 auto 24px;
-            stroke: #475569;
+            stroke: var(--text-tertiary);
             stroke-width: 2;
             fill: none;
+            transition: stroke 0.3s ease;
         }
 
         .empty-title {
-            color: #f1f5f9;
+            color: var(--text-primary);
             font-size: 24px;
             font-weight: 600;
             margin-bottom: 8px;
+            transition: color 0.3s ease;
         }
 
         .empty-description {
-            color: #64748b;
+            color: var(--text-tertiary);
             font-size: 14px;
             line-height: 1.6;
+            transition: color 0.3s ease;
         }
 
         .charity-buttons {
@@ -341,9 +531,9 @@
             max-width: 240px;
             height: 120px;
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
-            border: 2px solid #334155;
+            border: 2px solid var(--border-color-light);
             border-radius: 16px;
-            color: #f1f5f9;
+            color: var(--text-primary);
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -356,7 +546,7 @@
         }
 
         .charity-button:hover {
-            border-color: #3b82f6;
+            border-color: var(--accent-color);
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%);
             transform: translateY(-2px);
         }
@@ -370,24 +560,27 @@
         }
 
         .intro-form {
-            background: rgba(30, 41, 59, 0.3);
-            border: 1px solid #334155;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color-light);
             border-radius: 16px;
             padding: 32px;
             max-width: 500px;
             margin: 0 auto;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .intro-form h2 {
-            color: #f1f5f9;
+            color: var(--text-primary);
             font-size: 20px;
             margin-bottom: 8px;
+            transition: color 0.3s ease;
         }
 
         .intro-form p {
-            color: #64748b;
+            color: var(--text-tertiary);
             font-size: 14px;
             margin-bottom: 24px;
+            transition: color 0.3s ease;
         }
 
         .payment-details-button {
@@ -728,6 +921,57 @@
             object-fit: cover;
         }
 
+        .detail-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.75);
+            color: #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .detail-arrow:hover {
+            background: rgba(15, 23, 42, 0.95);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .detail-arrow svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+        }
+
+        .detail-arrow-prev {
+            left: 12px;
+        }
+
+        .detail-arrow-next {
+            right: 12px;
+        }
+
+        .detail-image-counter {
+            position: absolute;
+            bottom: 16px;
+            right: 18px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #cbd5f5;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10;
+        }
+
         .close-button {
             position: absolute;
             top: 16px;
@@ -955,476 +1199,6 @@
         }
 
 
-        .chats-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-item {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: rgba(30, 41, 59, 0.3);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 12px;
-        }
-
-        .chat-item:hover {
-            background: rgba(30, 41, 59, 0.5);
-            border-color: #3b82f6;
-        }
-
-        .chat-item-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #334155;
-        }
-
-        .chat-item-info {
-            flex: 1;
-        }
-
-        .chat-item-name {
-            color: #f1f5f9;
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .chat-item-last-message {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .chat-item-notification {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 12px;
-            height: 12px;
-            background: #10b981;
-            border-radius: 50%;
-            border: 2px solid #0f1629;
-        }
-
-        .chat-date-separator {
-            text-align: center;
-            margin: 16px 0;
-            position: relative;
-        }
-
-        .chat-date-separator::before,
-        .chat-date-separator::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 35%;
-            height: 1px;
-            background: #334155;
-        }
-
-        .chat-date-separator::before {
-            left: 0;
-        }
-
-        .chat-date-separator::after {
-            right: 0;
-        }
-
-        .chat-date-text {
-            display: inline-block;
-            padding: 4px 12px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            color: #64748b;
-            font-size: 12px;
-        }
-
-        .message-actions {
-            display: none;
-            gap: 8px;
-            margin-top: 4px;
-        }
-
-        .chat-message:hover .message-actions {
-            display: flex;
-        }
-
-        .message-edit-btn {
-            background: transparent;
-            border: none;
-            color: #64748b;
-            font-size: 11px;
-            cursor: pointer;
-            padding: 2px 8px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .message-edit-btn:hover {
-            color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-
-        .chat-container {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 380px;
-            background: #0f1629;
-            border: 1px solid #1e293b;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-        }
-
-        .chat-container.active {
-            display: flex;
-        }
-
-        .chat-container-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
-            z-index: 3000;
-        }
-
-        .chat-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            border-bottom: 1px solid #1e293b;
-        }
-
-        .chat-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #334155;
-        }
-
-        .chat-header-info {
-            flex: 1;
-        }
-
-        .chat-header-name {
-            color: #f1f5f9;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .chat-header-status {
-            color: #64748b;
-            font-size: 12px;
-        }
-
-        .chat-close {
-            width: 32px;
-            height: 32px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .chat-close:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-        .chat-close svg {
-            width: 20px;
-            height: 20px;
-            stroke: #64748b;
-            stroke-width: 2;
-            fill: none;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-message {
-            display: flex;
-            gap: 8px;
-            max-width: 80%;
-        }
-
-        .chat-message.own {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .message-bubble {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 10px 14px;
-        }
-
-        .chat-message.own .message-bubble {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-        }
-
-        .message-text {
-            color: #f1f5f9;
-            font-size: 14px;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-
-        .message-time {
-            color: #64748b;
-            font-size: 11px;
-            margin-top: 4px;
-        }
-
-        .message-attachment {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-
-        .chat-input-area {
-            padding: 16px;
-            border-top: 1px solid #1e293b;
-        }
-
-        .emoji-picker {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .emoji-btn {
-            width: 32px;
-            height: 32px;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid #334155;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .emoji-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-            transform: scale(1.1);
-        }
-
-        .chat-input-wrapper {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input {
-            flex: 1;
-            height: 40px;
-            padding: 0 12px;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            color: #f1f5f9;
-            font-size: 14px;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-
-        .chat-attach-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .chat-attach-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-        }
-
-        .chat-attach-btn svg {
-            width: 20px;
-            height: 20px;
-            stroke: #64748b;
-            stroke-width: 2;
-            fill: none;
-        }
-
-        .chat-send-btn {
-            width: 40px;
-            height: 40px;
-            background: #3b82f6;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .chat-send-btn:hover {
-            background: #2563eb;
-        }
-
-        .chat-send-btn svg {
-            width: 20px;
-            height: 20px;
-            stroke: white;
-            stroke-width: 2;
-            fill: none;
-        }
-
-        .chat-button {
-            width: 100%;
-            height: 44px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 16px;
-            display: none;
-        }
-
-        .chat-button.active {
-            display: block;
-        }
-
-        .chat-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 10px;
-            height: 10px;
-            background: #10b981;
-            border-radius: 50%;
-            border: 2px solid #0f1629;
-        }
-
-        .chat-container {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 380px;
-            background: #0f1629;
-            border: 1px solid #1e293b;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-        }
-
-        .chat-container.active {
-            display: flex;
-        }
-
-        .chat-container-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
-            z-index: 3000;
-        }
-
-        .chat-back-btn {
-            width: 32px;
-            height: 32px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            transition: background 0.2s;
-            margin-right: 8px;
-        }
-
-        .chat-back-btn:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-        .chat-back-btn svg {
-            width: 20px;
-            height: 20px;
-            stroke: #64748b;
-            stroke-width: 2;
-            fill: none;
-        }
-
-        .chats-list-view {
-            display: block;
-        }
-
-        .chats-list-view.hidden {
-            display: none;
-        }
 
         .rating-container {
             max-width: 1000px;
@@ -1654,7 +1428,8 @@
         .leaderboard-avatar svg {
             width: 24px;
             height: 24px;
-            stroke: #64748b;
+            stroke: var(--text-tertiary);
+            transition: stroke 0.3s ease;
         }
 
         .leaderboard-info {
@@ -1768,15 +1543,17 @@
         .platform-rules h2 {
             font-size: 28px;
             font-weight: 700;
-            color: #f1f5f9;
+            color: var(--text-primary);
             margin-bottom: 8px;
             text-align: center;
+            transition: color 0.3s ease;
         }
 
         .platform-rules-subtitle {
-            color: #94a3b8;
+            color: var(--text-secondary);
             text-align: center;
             margin-bottom: 24px;
+            transition: color 0.3s ease;
         }
 
         .platform-rule-item {
@@ -1814,15 +1591,6 @@
             line-height: 1.6;
         }
 
-        .chat-view {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .chat-view.active {
-            display: flex;
-        }
 
 
         @media (max-width: 768px) {
@@ -1968,6 +1736,58 @@
             line-height: 1.5;
             position: relative;
             z-index: 1;
+        }
+
+        .support-chat-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .support-chat-item:hover {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: #3b82f6;
+        }
+
+        .support-chat-item-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .support-chat-item-avatar svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+        }
+
+        .support-chat-item-info {
+            flex: 1;
+        }
+
+        .support-chat-item-name {
+            color: #f1f5f9;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .support-chat-item-last-message {
+            color: #64748b;
+            font-size: 13px;
         }
 
         .support-modal {
@@ -2370,7 +2190,6 @@
         .nav-item,
         button,
         .post-card,
-        .chat-item,
         .support-category,
         .support-solution,
         .rule-card,
@@ -2378,7 +2197,6 @@
         .upload-button,
         .submit-button,
         .support-btn,
-        .chat-send-btn,
         .support-chat-send-btn {
             position: relative;
             overflow: hidden;
@@ -2405,13 +2223,6 @@
                     </svg>
                     <span>Благотворительность</span>
                 </div>
-                <div class="nav-item hidden" data-tab="chats">
-                    <svg class="nav-icon" viewBox="0 0 24 24">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    <span>Чаты</span>
-                    <span class="notification-badge" id="chatsNotificationBadge" style="display: none;"></span>
-                </div>
                 <div class="nav-item hidden" data-tab="rating">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -2419,10 +2230,8 @@
                     <span>Рейтинг</span>
                 </div>
                 <div class="nav-item" data-tab="info">
-                    <svg class="nav-icon" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                     </svg>
                     <span>Поддержка</span>
                 </div>
@@ -2442,14 +2251,25 @@
         <div class="card">
             <div class="content-section active" id="profile">
                 <div class="header">
-                    <div class="icon-wrapper">
-                        <svg class="user-icon" viewBox="0 0 24 24">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+                    <div class="header-content">
+                        <div class="icon-wrapper">
+                            <svg class="user-icon" viewBox="0 0 24 24">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1>Профиль</h1>
+                            <p class="subtitle">Заполните информацию о себе</p>
+                        </div>
                     </div>
-                    <h1>Профиль</h1>
-                    <p class="subtitle">Заполните информацию о себе</p>
+                    <div class="theme-toggle-wrapper">
+                        <span class="theme-toggle-label">Темная тема</span>
+                        <label class="theme-toggle">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="theme-toggle-slider"></span>
+                        </label>
+                    </div>
                 </div>
 
                 <form id="profileForm">
@@ -2582,35 +2402,35 @@
                 
                 <!-- Блок отображения созданного поста пользователя -->
                 <div id="userPostView" style="display: none;">
-                    <div class="post-card" style="max-width: 700px; margin: 0 auto; background: rgba(30, 41, 59, 0.4); border: 1px solid #334155; border-radius: 16px; overflow: hidden;">
-                        <!-- Галерея медиа - отдельно от текста -->
-                        <div id="userPostMediaGallery" style="width: 100%; background: rgba(15, 22, 41, 0.6); padding: 0;">
+                    <div class="post-detail-content" style="max-width: 700px; margin: 0 auto; position: relative; overflow: visible; max-height: none;">
+                        <button id="editPostBtn" style="position: absolute; top: 16px; left: 16px; right: auto; width: 40px; height: 40px; background: rgba(15, 22, 41, 0.9); border: 1px solid #334155; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 10;" onmouseover="this.style.background='rgba(15, 22, 41, 1)'; this.style.borderColor='#3b82f6';" onmouseout="this.style.background='rgba(15, 22, 41, 0.9)'; this.style.borderColor='#334155';">
+                            <svg style="width: 20px; height: 20px; stroke: #3b82f6; stroke-width: 2; fill: none;" viewBox="0 0 24 24">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <div class="post-detail-header" id="userPostMediaGallery" style="position: relative;">
                             <!-- Медиа будут добавлены динамически -->
-                            </div>
-                        <!-- Контент поста -->
-                        <div class="post-content" style="padding: 24px;">
-                            <div class="post-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                                <div class="post-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
-                                    <img id="userPostAvatar" src="/placeholder.svg" alt="" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
-                                <span class="post-author" id="userPostAuthor" style="font-size: 16px; font-weight: 600; color: #f1f5f9;"></span>
-                    </div>
-                            <h2 class="post-title" id="userPostTitle" style="font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 12px;"></h2>
-                            <p class="post-description" id="userPostDescription" style="font-size: 15px; color: #94a3b8; line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap;"></p>
-                            <div class="post-progress" style="margin-bottom: 20px;">
-                                <div class="progress-bar" style="width: 100%; height: 10px; background: rgba(30, 41, 59, 0.5); border-radius: 5px; overflow: hidden; margin-bottom: 8px;">
-                                    <div class="progress-fill" id="userPostProgress" style="height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.3s; border-radius: 5px;"></div>
-                                </div>
-                                <div class="progress-text" style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #64748b; margin-top: 12px;">
-                                    <span id="userPostCollected">Собрано: <span style="color: #10b981; font-weight: 600;">0 ₽</span></span>
-                                    <span id="userPostAmount" class="user-post-amount-badge"></span>
+                        <div class="post-detail-body">
+                            <div class="detail-author">
+                                <img id="userPostAvatar" src="/placeholder.svg" alt="" class="detail-avatar">
+                                <div class="detail-author-info">
+                                    <h3 id="userPostAuthor"></h3>
+                                    <p>Нуждается в помощи</p>
                                 </div>
                             </div>
-                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(51, 65, 85, 0.5);">
-                                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;"><strong style="color: #e2e8f0;">Получатель:</strong> <span id="userPostRecipient"></span></p>
-                                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;"><strong style="color: #e2e8f0;">Банк:</strong> <span id="userPostBank"></span></p>
-                                <p style="color: #94a3b8; font-size: 14px;"><strong style="color: #e2e8f0;">Телефон:</strong> <span id="userPostPhone"></span></p>
+                            <h2 class="post-detail-title" id="userPostTitle"></h2>
+                            <p class="post-detail-description" id="userPostDescription"></p>
+                            <div class="post-detail-info">
+                                <div class="amount-display" id="userPostAmountWrapper" style="--progress-width: 0%">
+                                    <div class="amount-display-content">
+                                        <span class="amount-display-collected" id="userPostCollected"></span>
+                                        <span class="amount-display-target" id="userPostAmount"></span>
+                                </div>
                             </div>
+                        </div>
+                            <div class="detail-post-id" id="userPostId"></div>
                         </div>
                     </div>
                 </div>
@@ -2713,7 +2533,7 @@
                         <p class="subtitle">Мы поможем решить вашу проблему</p>
                     </div>
 
-                    <div class="support-categories">
+                    <div class="support-categories" id="supportCategories">
                         <div class="support-category" id="authProblems">
                             <div class="support-category-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
@@ -2725,7 +2545,7 @@
                             <p>Не могу войти в аккаунт, забыл пароль, проблемы с телефоном</p>
                         </div>
 
-                        <div class="support-category" id="sendMoneyProblems">
+                        <div class="support-category" id="sendMoneyProblems" style="display: none;">
                             <div class="support-category-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
                                     <line x1="12" y1="1" x2="12" y2="23"></line>
@@ -2736,7 +2556,7 @@
                             <p>Не могу отправить деньги, перевод не прошел, проблемы с реквизитами</p>
                         </div>
 
-                        <div class="support-category" id="receiveMoneyProblems">
+                        <div class="support-category" id="receiveMoneyProblems" style="display: none;">
                             <div class="support-category-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
                                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
@@ -2756,6 +2576,56 @@
                             </div>
                             <h3>Иное</h3>
                             <p>Другие вопросы и проблемы</p>
+                        </div>
+                    </div>
+
+                    <!-- Полоска чата поддержки (показывается после закрытия модального окна) -->
+                    <div class="support-chat-item" id="supportChatItem" style="display: none;">
+                        <div class="support-chat-item-avatar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="support-chat-item-info">
+                            <div class="support-chat-item-name">Поддержка</div>
+                            <div class="support-chat-item-last-message" id="supportChatLastMessage">Начните диалог</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Chat Window -->
+                <div class="support-chat-container" id="supportChatContainer" style="display: none;">
+                    <div class="support-chat-window">
+                        <div class="support-chat-header">
+                            <div class="support-chat-header-info">
+                                <div class="support-chat-avatar">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="support-chat-operator">Поддержка</div>
+                                    <div class="support-chat-status">онлайн</div>
+                                </div>
+                            </div>
+                            <button class="support-close-btn" id="closeSupportChat">
+                                <svg viewBox="0 0 24 24">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="support-chat-messages" id="supportChatMessages">
+                            <!-- Messages will be added here -->
+                        </div>
+                        <div class="support-chat-input-container">
+                            <input type="text" class="support-chat-input" id="supportChatInput" placeholder="Напишите сообщение...">
+                            <button class="support-chat-send-btn" id="supportChatSendBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -2778,7 +2648,7 @@
 
                     <!-- Platform rules -->
                     <div class="platform-rules">
-                        <h2>Правила платформы "Макс"</h2>
+                        <h2>Правила платформы "Max"</h2>
                         <p class="platform-rules-subtitle">Общие положения для всех пользователей</p>
                         
                         <div class="platform-rule-item">
@@ -2788,7 +2658,7 @@
                                 </svg>
                             </div>
                             <div class="platform-rule-text">
-                                <strong>Честность и прозрачность:</strong> Вся информация на платформе должна быть правдивой. Предоставление ложных данных или документов приведет к немедленной блокировке аккаунта.
+                                <strong>Честность и прозрачность:</strong> Указывайте только реальные данные, фото и реквизиты. Любые попытки загрузить чужие документы, скрыть возраст или подменить чек приводят к блокировке.
                             </div>
                         </div>
 
@@ -2799,7 +2669,7 @@
                                 </svg>
                             </div>
                             <div class="platform-rule-text">
-                                <strong>Уважение к другим:</strong> Запрещены оскорбления, угрозы и любые формы дискриминации. Общайтесь с другими пользователями вежливо и уважительно.
+                                <strong>Уважение к другим:</strong> Общайтесь с получателями и благотворителями корректно. Запрещены оскорбления, давление и требования дополнительных переводов вне платформы.
                             </div>
                         </div>
 
@@ -2810,7 +2680,7 @@
                                 </svg>
                             </div>
                             <div class="platform-rule-text">
-                                <strong>Конфиденциальность:</strong> Защита персональных данных — наш приоритет. Не распространяйте чужую личную информацию без согласия.
+                                <strong>Конфиденциальность:</strong> Личные данные, загруженные документы и чеки используются только для проверки переводов. Не делитесь чужой информацией без разрешения.
                             </div>
                         </div>
 
@@ -2821,7 +2691,7 @@
                                 </svg>
                             </div>
                             <div class="platform-rule-text">
-                                <strong>Запрет на мошенничество:</strong> Любые попытки обмана, создания фальшивых аккаунтов или манипуляций с системой строго запрещены и караются блокировкой.
+                                <strong>Безопасность переводов:</strong> Все пожертвования проходят через официальные реквизиты и подтверждаются загрузкой чека. Сохраняйте квитанцию до окончания проверки.
                             </div>
                         </div>
 
@@ -2832,7 +2702,7 @@
                                 </svg>
                             </div>
                             <div class="platform-rule-text">
-                                <strong>Возрастные ограничения:</strong> Для регистрации на платформе вам должно быть не менее 18 лет. Верификация личности обязательна для создания постов о помощи.
+                                <strong>Возраст и верификация:</strong> Создавать посты могут пользователи старше 18 лет с подтвержденной личностью и загруженным аватаром. Это защита от мошенничества и доверие благотворителей.
                             </div>
                         </div>
                     </div>
@@ -2845,8 +2715,7 @@
                                 <div class="rule-card-number">1</div>
                                 <h3 class="rule-card-title">Представление</h3>
                                 <p class="rule-card-description">
-                                    При первом входе в раздел "Благотворительность" вам нужно представиться — указать ваше имя. 
-                                    Это позволит верифицироваться на платформе.
+                                    Укажите своё имя при первом входе. Оно попадёт в лист благодарностей и будет отображаться в чате после подтверждения перевода.
                                 </p>
                             </div>
 
@@ -2854,8 +2723,7 @@
                                 <div class="rule-card-number">2</div>
                                 <h3 class="rule-card-title">Выбор получателя</h3>
                                 <p class="rule-card-description">
-                                    После представления вы получите доступ ко всем постам людей, нуждающихся в помощи. 
-                                    Вы можете просмотреть их истории и цели сбора.
+                                    Изучайте посты с историями и целями сборов. В правом верхнем углу карточек указан уникальный ID — он понадобится при переводе и загрузке чека.
                                 </p>
                             </div>
 
@@ -2863,34 +2731,31 @@
                                 <div class="rule-card-number">3</div>
                                 <h3 class="rule-card-title">Пожертвование</h3>
                                 <p class="rule-card-description">
-                                    Выберите сумму, которую хотите пожертвовать. Переведите деньги по указанным реквизитам получателя.
+                                    Нажмите «Реквизиты для помощи», переведите средства, укажите ID поста в комментарии и загрузите чек (JPG/PNG/PDF до 10&nbsp;МБ). Без чека перевод не попадает в обработку.
                                 </p>
                             </div>
 
                             <div class="rule-card">
                                 <div class="rule-card-number">4</div>
-                                <h3 class="rule-card-title">Рейтинг и статусы</h3>
+                                <h3 class="rule-card-title">Просмотр постов</h3>
                                 <p class="rule-card-description">
-                                    За пожертвования вы получаете баллы и статусы: от "Друг Платформы" до "Пламенное Сердце". 
-                                    Топ-3 благотворителя получают ежедневные значки.
-                                    Подробнее во вкладке "Рейтинг"*
+                                    В каждом посте можно просмотреть несколько изображений, используя стрелки навигации. Также можно посмотреть историю предыдущих постов автора, нажав на его аватар или имя.
                                 </p>
                             </div>
 
                             <div class="rule-card">
                                 <div class="rule-card-number">5</div>
-                                <h3 class="rule-card-title">Общение</h3>
+                                <h3 class="rule-card-title">Рейтинг и статусы</h3>
                                 <p class="rule-card-description">
-                                    После пожертвования открывается раздел "Чаты", где вы можете общаться с получателями помощи, 
-                                    следить за их прогрессом и получать благодарности.
+                                    Баллы и статусы начисляются только за подтверждённые переводы. После проверки чека ваш вклад отражается в разделе «Рейтинг».
                                 </p>
                             </div>
 
                             <div class="rule-card">
                                 <div class="rule-card-number">6</div>
-                                <h3 class="rule-card-title">Дополнительная информация</h3>
+                                <h3 class="rule-card-title">Поддержка</h3>
                                 <p class="rule-card-description">
-                                    В разделе "Поддержка" вы найдете ответы на часто задаваемые вопросы и способы связи с поддержкой.
+                                    Во вкладке «Поддержка» выберите категорию проблемы или «Иное» для связи со службой поддержки. После первого обращения чат сохраняется, и вы можете вернуться к нему в любое время.
                                 </p>
                             </div>
                         </div>
@@ -2904,8 +2769,7 @@
                                 <div class="rule-card-number">1</div>
                                 <h3 class="rule-card-title">Верификация личности</h3>
                                 <p class="rule-card-description">
-                                    Нажмите "Мне нужна помощь" и заполните форму верификации: ФИО, дата рождения, 
-                                    паспортные данные, ИНН/СНИЛС. Загрузите фото/сканы паспорта.
+                                    Нажмите «Мне нужна помощь», заполните анкету, прикрепите паспортные сканы и загрузите собственное фото — без аватара пост создать нельзя.
                                 </p>
                             </div>
 
@@ -2913,8 +2777,7 @@
                                 <div class="rule-card-number">2</div>
                                 <h3 class="rule-card-title">Согласие с условиями</h3>
                                 <p class="rule-card-description">
-                                    Подтвердите три обязательных пункта: согласие на обработку персональных данных, 
-                                    подтверждение подлинности данных и их правдивости.
+                                    Подтвердите согласие на обработку данных и честность предоставленной информации. Платформа работает только с пользователями старше 18 лет.
                                 </p>
                             </div>
 
@@ -2922,8 +2785,7 @@
                                 <div class="rule-card-number">3</div>
                                 <h3 class="rule-card-title">Проверка данных</h3>
                                 <p class="rule-card-description">
-                                    После отправки ваши данные проверяются модераторами. Обычно это занимает 2-5 минут. 
-                                    При несовпадении данных с фото — блокировка аккаунта.
+                                    После отправки анкеты появится модальное окно с прогрессом. Обычно проверка занимает 2–5 минут. При несоответствии данных доступ блокируется.
                                 </p>
                             </div>
 
@@ -2931,26 +2793,23 @@
                                 <div class="rule-card-number">4</div>
                                 <h3 class="rule-card-title">Создание поста</h3>
                                 <p class="rule-card-description">
-                                    После одобрения создайте пост: загрузите фото/видео, напишите название и описание (до 10 000 символов), 
-                                    укажите реквизиты и необходимую сумму.
+                                    Загружайте несколько изображений (до 3 файлов), указывайте название, описание и сумму. Имя и первая буква фамилии отображаются автоматически на основе верификации. Изображения можно просматривать с помощью стрелок навигации.
                                 </p>
                             </div>
 
                             <div class="rule-card">
                                 <div class="rule-card-number">5</div>
-                                <h3 class="rule-card-title">Ваш пост</h3>
+                                <h3 class="rule-card-title">Редактирование поста</h3>
                                 <p class="rule-card-description">
-                                    В разделе "Благотворительность" вы видите только свой пост. Вы можете редактировать всё: 
-                                    название, описание, фото, реквизиты — кроме суммы сбора.
+                                    После публикации вы видите собственный пост вместе с прогрессом сбора. Редактировать можно всё, кроме целевой суммы — выбирайте её внимательно. При редактировании все загруженные вложения отображаются в специальном поле с возможностью просмотра и удаления.
                                 </p>
                             </div>
 
                             <div class="rule-card">
                                 <div class="rule-card-number">6</div>
-                                <h3 class="rule-card-title">Чаты с благотворителями</h3>
+                                <h3 class="rule-card-title">Поддержка</h3>
                                 <p class="rule-card-description">
-                                    После первого пожертвования откроется раздел "Чаты". Там вы сможете общаться с людьми, 
-                                    которые вам помогли, и поблагодарить их.
+                                    Во вкладке «Поддержка» выберите категорию проблемы (проблемы с авторизацией или получением средств) или «Иное» для связи со службой поддержки. После первого обращения чат сохраняется, и вы можете вернуться к нему в любое время.
                                 </p>
                             </div>
                         </div>
@@ -2958,78 +2817,6 @@
                 </div>
             </div>
 
-            <!-- ADDING CHATS SECTION -->
-            <div class="content-section" id="chats">
-                <div class="chats-list-view" id="chatsListView">
-                    <div class="header">
-                        <div class="icon-wrapper">
-                            <svg class="user-icon" viewBox="0 0 24 24">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                        </div>
-                        <h1>Чаты</h1>
-                        <p class="subtitle">Ваши диалоги с получателями помощи</p>
-                    </div>
-
-                    <div class="chats-list" id="chatsList">
-                        <!-- Chats will be dynamically added here -->
-                    </div>
-
-                    <div id="emptyChats" class="empty-content">
-                        <svg class="empty-icon" viewBox="0 0 24 24">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        <h2 class="empty-title">Нет активных чатов</h2>
-                        <p id="chatsDescription" class="empty-description">После подтверждения вашего пожертвования<br>здесь появятся диалоги с получателями помощи</p>
-                    </div>
-                </div>
-
-                <div class="chat-view" id="chatView">
-                    <div class="chat-header">
-                        <button class="chat-back-btn" id="chatBackBtn">
-                            <svg viewBox="0 0 24 24">
-                                <line x1="19" y1="12" x2="5" y2="12"></line>
-                                <polyline points="12 19 5 12 12 5"></polyline>
-                            </svg>
-                        </button>
-                        <img src="/placeholder.svg" alt="" class="chat-avatar" id="chatRecipientAvatar">
-                        <div class="chat-header-info">
-                            <div class="chat-header-name" id="chatRecipientName">Анна С.</div>
-                            <div class="chat-header-status">онлайн</div>
-                        </div>
-                    </div>
-                    <div class="chat-messages" id="chatMessages">
-                        <!-- Messages will be dynamically added here -->
-                    </div>
-                    <div class="chat-input-area">
-                        <div class="emoji-picker">
-                            <button class="emoji-btn" data-emoji="😊">😊</button>
-                            <button class="emoji-btn" data-emoji="❤️">❤️</button>
-                            <button class="emoji-btn" data-emoji="🙏">🙏</button>
-                            <button class="emoji-btn" data-emoji="👍">👍</button>
-                            <button class="emoji-btn" data-emoji="🎉">🎉</button>
-                            <button class="emoji-btn" data-emoji="💪">💪</button>
-                            <button class="emoji-btn" data-emoji="🌟">🌟</button>
-                            <button class="emoji-btn" data-emoji="✨">✨</button>
-                        </div>
-                        <div class="chat-input-wrapper">
-                            <input type="text" class="chat-input" id="chatInput" placeholder="Напишите сообщение...">
-                            <label for="chatAttachment" class="chat-attach-btn">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                                </svg>
-                            </label>
-                            <input type="file" id="chatAttachment" accept="image/*,video/*" style="display: none;">
-                            <button class="chat-send-btn" id="sendMessage">
-                                <svg viewBox="0 0 24 24">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -3135,6 +2922,17 @@
         <div class="post-detail-content">
             <div class="post-detail-header">
                 <img src="/placeholder.svg" alt="" class="post-detail-image" id="detailImage">
+                <button type="button" id="detailArrowPrev" class="detail-arrow detail-arrow-prev" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"></path>
+                    </svg>
+                </button>
+                <button type="button" id="detailArrowNext" class="detail-arrow detail-arrow-next" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 6l6 6-6 6"></path>
+                    </svg>
+                </button>
+                <div id="detailImageCounter" class="detail-image-counter" style="display: none;"></div>
                 <button class="close-button" id="closeDetail">
                     <svg viewBox="0 0 24 24">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -3144,7 +2942,7 @@
             </div>
             <div class="post-detail-body">
                 <!-- Adding author section with avatar -->
-                <div class="detail-author">
+                <div class="detail-author" id="detailAuthorSection" style="cursor: pointer;">
                     <img src="/placeholder.svg" alt="" class="detail-avatar" id="detailAuthorAvatar">
                     <div class="detail-author-info">
                         <h3 id="detailAuthorName"></h3>
@@ -3163,52 +2961,32 @@
         </div>
     </div>
 
-    <!-- CHAT CONTAINER (NOW FULLSCREEN ON MOBILE, AND MODAL ON DESKTOP) -->
-    <div class="chat-container" id="chatContainer">
-        <div class="chat-header">
-            <button class="chat-close" id="closeChat">
-                <svg viewBox="0 0 24 24">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <img src="/placeholder.svg" alt="" class="chat-avatar" id="chatRecipientAvatar">
-            <div class="chat-header-info">
-                <div class="chat-header-name" id="chatRecipientName">Анна С.</div>
-                <div class="chat-header-status">онлайн</div>
+    <!-- User Posts History Modal -->
+    <div class="post-detail" id="userPostsHistoryModal" style="display: none;">
+        <div class="post-detail-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div style="padding: 24px; border-bottom: 1px solid #334155;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <img src="/placeholder.svg" alt="" id="historyAuthorAvatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #334155;">
+                        <div>
+                            <h2 style="color: #f1f5f9; font-size: 24px; font-weight: 600; margin: 0;" id="historyAuthorName"></h2>
+                            <p style="color: #64748b; font-size: 14px; margin: 4px 0 0 0;">История постов</p>
+                        </div>
+                    </div>
+                    <button class="close-button" id="closeHistoryModal" style="position: relative; top: 0; right: 0;">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <!-- Messages will be dynamically added here -->
-        </div>
-        <div class="chat-input-area">
-            <div class="emoji-picker">
-                <button class="emoji-btn" data-emoji="😊">😊</button>
-                <button class="emoji-btn" data-emoji="❤️">❤️</button>
-                <button class="emoji-btn" data-emoji="🙏">🙏</button>
-                <button class="emoji-btn" data-emoji="👍">👍</button>
-                <button class="emoji-btn" data-emoji="🎉">🎉</button>
-                <button class="emoji-btn" data-emoji="💪">💪</button>
-                <button class="emoji-btn" data-emoji="🌟">🌟</button>
-                <button class="emoji-btn" data-emoji="✨">✨</button>
-            </div>
-            <div class="chat-input-wrapper">
-                <input type="text" class="chat-input" id="chatInput" placeholder="Напишите сообщение...">
-                <label for="chatAttachment" class="chat-attach-btn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                    </svg>
-                </label>
-                <input type="file" id="chatAttachment" accept="image/*,video/*" style="display: none;">
-                <button class="chat-send-btn" id="sendMessage">
-                    <svg viewBox="0 0 24 24">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
+            <div style="padding: 24px;">
+                <div class="posts-grid" id="historyPostsContainer"></div>
             </div>
         </div>
     </div>
+
 
     <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
@@ -3237,7 +3015,8 @@
                     recipient: "Анна С.",
                     bank: "Сбербанк",
                     phone: "+7 (912) 345-67-89",
-                    image: "image/1.jfif"
+                    image: "image/1.jfif",
+                    images: ["image/1.jfif", "image/1.1.jpg"]
                 },
                 {
                     id: 2,
@@ -3251,7 +3030,8 @@
                     recipient: "Мария П.",
                     bank: "ВТБ",
                     phone: "+7 (923) 456-78-90",
-                    image: "image/2.jpg"
+                    image: "image/2.jpg",
+                    images: ["image/2.jpg", "image/2.2.webp"]
                 },
                 {
                     id: 3,
@@ -3265,7 +3045,8 @@
                     recipient: "Петр И.",
                     bank: "Альфа-Банк",
                     phone: "+7 (934) 567-89-01",
-                    image: "image/3.jfif"
+                    image: "image/3.jfif",
+                    images: ["image/3.jfif", "image/4.avif", "image/5.webp"]
                 },
                 {
                     id: 4,
@@ -3279,7 +3060,8 @@
                     recipient: "Вера И.",
                     bank: "Тинькофф Банк",
                     phone: "+7 (945) 678-90-12",
-                    image: "image/4.avif"
+                    image: "image/4.avif",
+                    images: ["image/4.avif", "image/6.jpg", "image/7.jpeg"]
                 },
                 {
                     id: 5,
@@ -3293,7 +3075,8 @@
                     recipient: "Дмитрий К.",
                     bank: "Райффайзенбанк",
                     phone: "+7 (956) 789-01-23",
-                    image: "image/5.webp"
+                    image: "image/5.webp",
+                    images: ["image/5.webp", "image/8.jpg"]
                 },
                 {
                     id: 6,
@@ -3307,7 +3090,8 @@
                     recipient: "Алеся В.",
                     bank: "Сбербанк",
                     phone: "+7 (967) 890-12-34",
-                    image: "image/6.jpg"
+                    image: "image/6.jpg",
+                    images: ["image/6.jpg", "image/9.jpg", "image/10.jpg"]
                 },
                 {
                     id: 7,
@@ -3321,7 +3105,8 @@
                     recipient: "Максим Н.",
                     bank: "ВТБ",
                     phone: "+7 (978) 901-23-45",
-                    image: "image/7.jpeg"
+                    image: "image/7.jpeg",
+                    images: ["image/7.jpeg", "image/1.jfif"]
                 },
                 {
                     id: 8,
@@ -3335,7 +3120,8 @@
                     recipient: "Николай Ф.",
                     bank: "Газпромбанк",
                     phone: "+7 (989) 012-34-56",
-                    image: "image/8.jpg"
+                    image: "image/8.jpg",
+                    images: ["image/8.jpg", "image/2.jpg", "image/3.jfif"]
                 },
                 {
                     id: 9,
@@ -3349,7 +3135,8 @@
                     recipient: "Ольга В.",
                     bank: "Открытие",
                     phone: "+7 (990) 123-45-67",
-                    image: "image/9.jpg"
+                    image: "image/9.jpg",
+                    images: ["image/9.jpg", "image/4.avif"]
                 },
                 {
                     id: 10,
@@ -3363,9 +3150,92 @@
                     recipient: "Игорь Л.",
                     bank: "Совкомбанк",
                     phone: "+7 (901) 234-56-78",
-                    image: "image/10.jpg"
+                    image: "image/10.jpg",
+                    images: ["image/10.jpg", "image/5.webp", "image/6.jpg"]
                 }
             ];
+
+            // История постов для первых 3-х людей
+            const userPostsHistory = {
+                1: [ // Анна Соколова
+                    {
+                        id: 101,
+                        title: "Срочно нужна помощь с лекарствами для мамы",
+                        description: "Моей маме срочно нужны дорогие лекарства от диабета. Врач прописал курс лечения, но у нас нет средств. Мама очень плохо себя чувствует, и я очень переживаю. Любая помощь будет бесценна.",
+                        amount: 15000,
+                        collected: 15000,
+                        image: "image/1.jfif",
+                        date: "2024-01-15"
+                    },
+                    {
+                        id: 102,
+                        title: "Помощь с оплатой коммунальных услуг",
+                        description: "За последние месяцы накопилась задолженность по коммунальным услугам. Я временно без работы, и не могу оплатить счета. Очень прошу помочь, чтобы не остаться без света и воды.",
+                        amount: 8000,
+                        collected: 8000,
+                        image: "image/1.1.jpg",
+                        date: "2024-02-20"
+                    }
+                ],
+                2: [ // Мария Петрова
+                    {
+                        id: 201,
+                        title: "Лечение для дочки - первый сбор",
+                        description: "У моей дочки Саши диагностировали серьезное заболевание. Нужна срочная операция и курс лечения. Это первый сбор средств, который мы организовали. Очень надеемся на помощь добрых людей.",
+                        amount: 50000,
+                        collected: 50000,
+                        image: "image/2.jpg",
+                        date: "2024-01-10"
+                    },
+                    {
+                        id: 202,
+                        title: "Реабилитация после операции",
+                        description: "Операция прошла успешно, но теперь нужна длительная реабилитация. Дочке нужны специальные процедуры, массаж и занятия с реабилитологом. Без этого лечение будет неполным.",
+                        amount: 35000,
+                        collected: 35000,
+                        image: "image/2.2.webp",
+                        date: "2024-02-05"
+                    },
+                    {
+                        id: 203,
+                        title: "Медикаменты и витамины",
+                        description: "Для поддержания здоровья дочки нужны постоянные медикаменты и специальные витамины. Это важная часть лечения, без которой невозможно обойтись.",
+                        amount: 40000,
+                        collected: 40000,
+                        image: "image/3.jfif",
+                        date: "2024-03-12"
+                    }
+                ],
+                3: [ // Петр Иванов
+                    {
+                        id: 301,
+                        title: "Первая помощь после пожара",
+                        description: "После пожара нам срочно нужна была помощь на самое необходимое - одежда, еда, временное жилье. Благодаря помощи добрых людей мы смогли пережить первые трудные дни.",
+                        amount: 30000,
+                        collected: 30000,
+                        image: "image/3.jfif",
+                        date: "2024-01-25"
+                    },
+                    {
+                        id: 302,
+                        title: "Восстановление документов",
+                        description: "В пожаре сгорели все документы - паспорта, свидетельства о рождении детей, документы на квартиру. Нужна помощь на восстановление всех документов.",
+                        amount: 25000,
+                        collected: 25000,
+                        image: "image/4.avif",
+                        date: "2024-02-10"
+                    },
+                    {
+                        id: 303,
+                        title: "Мебель и бытовая техника",
+                        description: "После пожара нужно восстановить хотя бы минимальный набор мебели и бытовой техники для нормальной жизни семьи. Дети особенно нуждаются в кроватях и письменных столах.",
+                        amount: 20000,
+                        collected: 20000,
+                        image: "image/5.webp",
+                        date: "2024-02-28"
+                    }
+                ]
+            };
 
             const navItems = document.querySelectorAll('.nav-item');
             const contentSections = document.querySelectorAll('.content-section');
@@ -3382,14 +3252,41 @@
                     contentSections.forEach(section => section.classList.remove('active'));
                     document.getElementById(tabId).classList.add('active');
 
-                    if (tabId === 'chats') {
-                        renderChatsList();
-                    }
-                    
                     if (tabId === 'rating') {
                         initializeRating();
                     }
                 });
+            });
+
+            // Переключение темы
+            const themeToggle = document.getElementById('themeToggle');
+            const themeToggleLabel = document.querySelector('.theme-toggle-label');
+            
+            // Загружаем сохраненную тему
+            const savedTheme = getFromLocalStorage('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggle.checked = false; // Выключен = светлая тема
+                themeToggleLabel.textContent = 'Светлая тема';
+            } else {
+                document.body.classList.remove('light-theme');
+                themeToggle.checked = true; // Включен = темная тема
+                themeToggleLabel.textContent = 'Темная тема';
+            }
+            
+            // Обработчик переключения темы
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    // Включен = темная тема
+                    document.body.classList.remove('light-theme');
+                    themeToggleLabel.textContent = 'Темная тема';
+                    saveToLocalStorage('theme', 'dark');
+                } else {
+                    // Выключен = светлая тема
+                    document.body.classList.add('light-theme');
+                    themeToggleLabel.textContent = 'Светлая тема';
+                    saveToLocalStorage('theme', 'light');
+                }
             });
 
             const photoInput = document.getElementById('photoInput');
@@ -3472,15 +3369,50 @@
 
             function showHelperTabs() {
                 document.querySelector('.nav-item[data-tab="rating"]').classList.remove('hidden');
-                document.querySelector('.nav-item[data-tab="chats"]').classList.remove('hidden');
                 document.querySelector('.nav-item[data-tab="info"]').classList.remove('hidden');
+                // Показываем категорию "Проблемы с переводом средств" для тех, кто помогает
+                const sendMoneyCategory = document.getElementById('sendMoneyProblems');
+                if (sendMoneyCategory) {
+                    sendMoneyCategory.style.display = '';
+                }
+                // Скрываем категорию "Проблемы с получением средств"
+                const receiveMoneyCategory = document.getElementById('receiveMoneyProblems');
+                if (receiveMoneyCategory) {
+                    receiveMoneyCategory.style.display = 'none';
+                }
             }
             
             function showNeedyTabs() {
-                document.querySelector('.nav-item[data-tab="chats"]').classList.remove('hidden');
-                const emptyChatsDesc = document.getElementById('chatsDescription');
-                if (emptyChatsDesc) {
-                    emptyChatsDesc.textContent = 'Здесь будут чаты, когда вам пожертвуют';
+                // Функция для показа вкладок нуждающимся (без чатов)
+                // Показываем категорию "Проблемы с получением средств" для тех, кому нужна помощь
+                const receiveMoneyCategory = document.getElementById('receiveMoneyProblems');
+                if (receiveMoneyCategory) {
+                    receiveMoneyCategory.style.display = '';
+                }
+                // Скрываем категорию "Проблемы с переводом средств"
+                const sendMoneyCategory = document.getElementById('sendMoneyProblems');
+                if (sendMoneyCategory) {
+                    sendMoneyCategory.style.display = 'none';
+                }
+            }
+
+            // Проверяем, есть ли сохраненные сообщения чата поддержки при загрузке
+            const savedSupportMessages = getFromLocalStorage('supportChatMessages');
+            if (savedSupportMessages && savedSupportMessages.length > 0) {
+                // Скрываем категории и показываем полоску чата
+                const supportCategories = document.getElementById('supportCategories');
+                const supportChatItem = document.getElementById('supportChatItem');
+                
+                if (supportCategories && supportChatItem) {
+                    supportCategories.style.display = 'none';
+                    supportChatItem.style.display = 'flex';
+                    
+                    // Обновляем последнее сообщение в полоске
+                    const lastMessage = savedSupportMessages[savedSupportMessages.length - 1];
+                    const lastMessageText = lastMessage.text.length > 50 
+                        ? lastMessage.text.substring(0, 50) + '...' 
+                        : lastMessage.text;
+                    document.getElementById('supportChatLastMessage').textContent = lastMessageText;
                 }
             }
 
@@ -3782,17 +3714,37 @@
                                 
                                 <div style="margin-bottom: 24px;">
                                     <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 12px;">Фото/сканы паспорта</label>
-                                    <div style="border: 2px dashed #334155; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;" id="passportUploadArea">
-                                        <svg style="width: 48px; height: 48px; stroke: #64748b; margin: 0 auto 12px;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <div id="passportUploadArea" style="border: 2px dashed #334155; border-radius: 16px; padding: 24px; background: rgba(15, 23, 42, 0.55); text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 240px; position: relative;">
+                                        <div id="passportEmptyState" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #64748b;">
+                                            <svg style="width: 48px; height: 48px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
                                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                             <polyline points="17 8 12 3 7 8"></polyline>
                                             <line x1="12" y1="3" x2="12" y2="15"></line>
                                         </svg>
+                                            <div>
                                         <p style="color: #f1f5f9; font-size: 14px; margin-bottom: 4px;">Загрузите фото паспорта</p>
-                                        <p style="color: #64748b; font-size: 12px;">Можно загрузить несколько файлов</p>
+                                                <p style="color: #64748b; font-size: 12px;">Можно загрузить до 3 файлов (JPG/PNG)</p>
                                     </div>
-                                    <input type="file" id="passportFiles" multiple accept="image/*,.pdf" required style="display: none;">
-                                    <div id="passportPreview" style="margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px;"></div>
+                                        </div>
+                                        <div id="passportSlider" style="display: none; width: 100%; height: 220px; position: relative; border-radius: 16px; overflow: hidden; background: rgba(10, 14, 39, 0.6);">
+                                            <button type="button" id="passportArrowPrev" style="display: none; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; align-items: center; justify-content: center;">
+                                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                                    <path d="M15 18l-6-6 6-6"></path>
+                                                </svg>
+                                            </button>
+                                            <div id="passportMainContent" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"></div>
+                                            <button type="button" id="passportArrowNext" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px солid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; align-items: center; justify-content: center;">
+                                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                                    <path d="M9 6l6 6-6 6"></path>
+                                                </svg>
+                                            </button>
+                                            <button type="button" id="passportRemoveBtn" style="display: none; position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; background: rgba(239, 68, 68, 0.95); color: #ffffff; border: none; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);">×</button>
+                                            <div id="passportMainCounter" style="display: none; position: absolute; bottom: 16px; right: 18px; padding: 6px 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.85); color: #cbd5f5; font-size: 12px; font-weight: 600;"></div>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="passportFiles" multiple accept="image/*" required style="display: none;">
+                                    <p id="passportMediaCount" style="color: #64748b; font-size: 12px; margin-top: 6px; text-align: center;">Загружено: 0 / 3</p>
+                                    <p id="passportMediaError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Необходимо загрузить хотя бы одно изображение паспорта</p>
                                 </div>
                                 
                                 <div style="margin-bottom: 24px;">
@@ -3912,28 +3864,169 @@
                 
                 const passportUploadArea = document.getElementById('passportUploadArea');
                 const passportFiles = document.getElementById('passportFiles');
-                const passportPreview = document.getElementById('passportPreview');
+                const passportEmptyState = document.getElementById('passportEmptyState');
+                const passportSlider = document.getElementById('passportSlider');
+                const passportMainContent = document.getElementById('passportMainContent');
+                const passportArrowPrev = document.getElementById('passportArrowPrev');
+                const passportArrowNext = document.getElementById('passportArrowNext');
+                const passportRemoveBtn = document.getElementById('passportRemoveBtn');
+                const passportMainCounter = document.getElementById('passportMainCounter');
+                const passportMediaCount = document.getElementById('passportMediaCount');
+                const passportMediaError = document.getElementById('passportMediaError');
+                
+                let passportSelectedMedia = [];
+                let passportCurrentIndex = 0;
+                
+                function updatePassportInput() {
+                    const dt = new DataTransfer();
+                    passportSelectedMedia.forEach(item => {
+                        if (item.file) {
+                            dt.items.add(item.file);
+                        }
+                    });
+                    passportFiles.files = dt.files;
+                    if (!dt.files.length) {
+                        passportFiles.value = '';
+                    }
+                }
+                
+                function renderPassportPreview() {
+                    const total = passportSelectedMedia.length;
+                    passportFiles.required = total === 0;
+                    passportMediaCount.textContent = `Загружено: ${total} / 3`;
+                    passportEmptyState.style.display = total ? 'none' : 'flex';
+                    passportSlider.style.display = total ? 'block' : 'none';
+                    passportRemoveBtn.style.display = total ? 'flex' : 'none';
+                    passportMainCounter.style.display = total ? 'inline-flex' : 'none';
+                    passportMainContent.innerHTML = '';
+                    passportUploadArea.style.borderColor = '#334155';
+                    
+                    if (!total) {
+                        passportArrowPrev.style.display = 'none';
+                        passportArrowNext.style.display = 'none';
+                        if (passportMediaError) passportMediaError.style.display = 'none';
+                        passportCurrentIndex = 0;
+                        return;
+                    }
+                    
+                    if (passportCurrentIndex >= total) passportCurrentIndex = total - 1;
+                    if (passportCurrentIndex < 0) passportCurrentIndex = 0;
+                    
+                    const currentMedia = passportSelectedMedia[passportCurrentIndex];
+                    if (currentMedia && currentMedia.previewUrl) {
+                        passportMainContent.innerHTML = `
+                            <img src="${currentMedia.previewUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Скан паспорта">
+                        `;
+                    } else {
+                        passportMainContent.innerHTML = `
+                            <div style="color: #64748b; font-size: 13px;">Загрузка...</div>
+                        `;
+                    }
+                    
+                    passportMainCounter.textContent = `${passportCurrentIndex + 1} / ${total}`;
+                    if (passportMediaError && total > 0) {
+                        passportMediaError.style.display = 'none';
+                    }
+                    
+                    if (total === 1) {
+                        passportArrowPrev.style.display = 'none';
+                        passportArrowNext.style.display = 'flex';
+                    } else {
+                        passportArrowPrev.style.display = passportCurrentIndex === 0 ? 'none' : 'flex';
+                        passportArrowNext.style.display = passportCurrentIndex === total - 1 ? 'none' : 'flex';
+                    }
+                }
                 
                 passportUploadArea.addEventListener('click', () => {
                     passportFiles.click();
                 });
                 
+                passportArrowPrev.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (passportSelectedMedia.length < 2) return;
+                    passportCurrentIndex = (passportCurrentIndex - 1 + passportSelectedMedia.length) % passportSelectedMedia.length;
+                    renderPassportPreview();
+                });
+                
+                passportArrowNext.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (passportSelectedMedia.length < 2) return;
+                    passportCurrentIndex = (passportCurrentIndex + 1) % passportSelectedMedia.length;
+                    renderPassportPreview();
+                });
+                
+                passportRemoveBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (!passportSelectedMedia.length) return;
+                    passportSelectedMedia.splice(passportCurrentIndex, 1);
+                    updatePassportInput();
+                    if (passportCurrentIndex >= passportSelectedMedia.length) {
+                        passportCurrentIndex = passportSelectedMedia.length - 1;
+                    }
+                    renderPassportPreview();
+                });
+                
                 passportFiles.addEventListener('change', (e) => {
-                    passportPreview.innerHTML = '';
-                    Array.from(e.target.files).forEach((file) => {
+                    const originalFiles = Array.from(e.target.files || []);
+                    if (originalFiles.length > 3) {
+                        alert('Можно загрузить максимум 3 файла');
+                    }
+                    
+                    const files = originalFiles
+                        .filter(file => file.type.startsWith('image/'))
+                        .slice(0, 3);
+                    
+                    if (!files.length) {
+                        passportSelectedMedia = [];
+                        passportCurrentIndex = 0;
+                        updatePassportInput();
+                        renderPassportPreview();
+                        return;
+                    }
+                    
+                    passportSelectedMedia = files.map(file => ({
+                        file,
+                        type: file.type || 'image/jpeg',
+                        previewUrl: ''
+                    }));
+                    passportCurrentIndex = 0;
+                    updatePassportInput();
+                    renderPassportPreview();
+                    
+                    passportSelectedMedia.forEach((item, index) => {
                         const reader = new FileReader();
                         reader.onload = (event) => {
-                            const img = document.createElement('img');
-                            img.src = event.target.result;
-                            img.style.cssText = 'width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #334155;';
-                            passportPreview.appendChild(img);
+                            passportSelectedMedia[index].previewUrl = event.target.result;
+                            renderPassportPreview();
                         };
-                        reader.readAsDataURL(file);
+                        reader.readAsDataURL(item.file);
                     });
                 });
                 
+                const savedVerificationData = getFromLocalStorage('verificationData');
+                if (savedVerificationData && Array.isArray(savedVerificationData.passportScans) && savedVerificationData.passportScans.length) {
+                    passportSelectedMedia = savedVerificationData.passportScans.slice(0, 3).map(src => ({
+                        file: null,
+                        type: 'image/jpeg',
+                        previewUrl: src
+                    }));
+                    passportCurrentIndex = Math.min(passportSelectedMedia.length - 1, passportCurrentIndex);
+                    updatePassportInput();
+                }
+                renderPassportPreview();
+                
                 document.getElementById('verificationForm').addEventListener('submit', (e) => {
                     e.preventDefault();
+                    
+                    if (!passportSelectedMedia.length || passportSelectedMedia.every(item => !item.previewUrl)) {
+                        if (passportMediaError) passportMediaError.style.display = 'block';
+                        passportUploadArea.style.borderColor = '#ef4444';
+                        passportUploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    } else {
+                        if (passportMediaError) passportMediaError.style.display = 'none';
+                        passportUploadArea.style.borderColor = '#334155';
+                    }
                     
                     const docTypeInn = document.getElementById('docTypeInn').checked;
                     const docTypeSnils = document.getElementById('docTypeSnils').checked;
@@ -3978,7 +4071,7 @@
                         docType: docTypeInn ? 'inn' : 'snils',
                         inn: docTypeInn ? document.getElementById('verInn').value : '',
                         snils: docTypeSnils ? document.getElementById('verSnils').value : '',
-                        passportScans: Array.from(document.getElementById('passportPreview').querySelectorAll('img')).map(img => img.src),
+                        passportScans: passportSelectedMedia.map(item => item.previewUrl).filter(Boolean),
                         consent1: document.getElementById('consent1').checked,
                         consent2: document.getElementById('consent2').checked,
                         consent3: document.getElementById('consent3').checked,
@@ -4062,19 +4155,78 @@
                 `;
                 
                 modal.innerHTML = `
-                    <div style="background: #0f1629; border: 1px solid #1e293b; border-radius: 24px; max-width: 500px; width: 100%; padding: 48px; text-align: center;">
-                        <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-                            <svg style="width: 32px; height: 32px; stroke: #10b981;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <div style="position: relative; background: linear-gradient(145deg, #111b34 0%, #0b1120 100%); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 28px; max-width: 560px; width: 100%; padding: 56px 40px; overflow: hidden; box-shadow: 0 40px 120px rgba(8, 47, 73, 0.45);">
+                        <div style="position: absolute; inset: -140px -160px auto auto; width: 320px; height: 320px; background: radial-gradient(circle at center, rgba(59, 130, 246, 0.3), transparent 65%); filter: blur(12px);"></div>
+                        <div style="position: absolute; bottom: -80px; left: -40px; width: 260px; height: 260px; background: radial-gradient(circle at center, rgba(16, 185, 129, 0.28), transparent 65%); filter: blur(30px);"></div>
+                        <div style="position: relative; z-index: 1;">
+                            <div style="display: flex; align-items: center; gap: 18px; margin-bottom: 28px;">
+                                <div style="width: 68px; height: 68px; border-radius: 22px; background: rgba(59, 130, 246, 0.18); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);">
+                                    <svg style="width: 34px; height: 34px; stroke: #3b82f6;" viewBox="0 0 24 24" fill="none" stroke-width="2">
                                 <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
                         </div>
-                        <h2 style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-bottom: 12px;">Пост успешно создан!</h2>
-                        <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
-                            Ваш пост создан и готов к просмотру. Теперь другие пользователи смогут увидеть вашу ситуацию и помочь вам.
-                        </p>
-                        <button id="closePostCreatedModal" style="width: 100%; height: 48px; background: #3b82f6; border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px;">
-                            Понятно
+                                <div>
+                                    <p style="color: #38bdf8; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Статус: отправлено на модерацию</p>
+                                    <h2 style="color: #f8fafc; font-size: 26px; font-weight: 700; margin: 0;">Пост принят и передан команде проверки</h2>
+                                </div>
+                            </div>
+                            
+                            <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin-bottom: 28px;">
+                                Мы внимательно проверим текст, фото и данные, чтобы защитить вас и жертвующих. 
+                                Как только модерация завершится, пост автоматически появится в ленте, а вы получите уведомление.
+                            </p>
+                            
+                            <div style="margin: 32px 0; padding: 26px 24px; border-radius: 22px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.25);">
+                                <div style="display: flex; flex-direction: column; gap: 18px;">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="width: 14px; height: 14px; border-radius: 50%; background: rgba(59, 130, 246, 0.8); box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.18);"></div>
+                                        <div>
+                                            <p style="color: #f8fafc; font-weight: 600; font-size: 15px; margin-bottom: 4px;">Автопроверка</p>
+                                            <p style="color: #64748b; font-size: 13px; margin: 0;">Алгоритмы оценивают корректность текста и медиа</p>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="width: 14px; height: 14px; border-radius: 50%; background: rgba(251, 191, 36, 0.9); box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.22);"></div>
+                                        <div>
+                                            <p style="color: #f8fafc; font-weight: 600; font-size: 15px; margin-bottom: 4px;">Модерирование</p>
+                                            <p style="color: #64748b; font-size: 13px; margin: 0;">Специалист проверяет историю и документы</p>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="width: 14px; height: 14px; border-radius: 50%; background: rgba(16, 185, 129, 0.9); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.2);"></div>
+                                        <div>
+                                            <p style="color: #f8fafc; font-weight: 600; font-size: 15px; margin-bottom: 4px;">Публикация</p>
+                                            <p style="color: #64748b; font-size: 13px; margin: 0;">После одобрения пост появится в ленте автоматически</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 32px;">
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <span style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.35); color: #bfdbfe; font-size: 13px; font-weight: 600;">
+                                        <svg style="width: 16px; height: 16px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                            <path d="M12 6v6l3 3"></path>
+                                        </svg>
+                                        Среднее время проверки — до 15 минут
+                                    </span>
+                                    <span style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #a7f3d0; font-size: 13px; font-weight: 600;">
+                                        <svg style="width: 16px; height: 16px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                            <path d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        Уведомим, как только пост станет доступен
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <button id="closePostCreatedModal" style="width: 100%; height: 50px; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); border: none; border-radius: 14px; color: #f8fafc; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px;">
+                                Перейти к посту
+                                <svg style="width: 18px; height: 18px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <path d="M5 12h14"></path>
+                                    <path d="M12 5l7 7-7 7"></path>
+                                </svg>
                         </button>
+                        </div>
                     </div>
                 `;
                 
@@ -4171,7 +4323,67 @@
                 const uniqueId = generatePostId(post.id);
                 document.getElementById('detailPostId').textContent = `ID: ${uniqueId}`;
                 
+                // Добавляем обработчик клика на аватар/имя для показа истории постов
+                const authorSection = document.getElementById('detailAuthorSection');
+                if (userPostsHistory[post.id]) {
+                    authorSection.style.cursor = 'pointer';
+                    authorSection.onclick = (e) => {
+                        e.stopPropagation();
+                        showUserPostsHistory(post);
+                    };
+                } else {
+                    authorSection.style.cursor = 'default';
+                    authorSection.onclick = null;
+                }
+                
                 postDetail.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function showUserPostsHistory(post) {
+                const history = userPostsHistory[post.id];
+                if (!history || history.length === 0) return;
+                
+                const modal = document.getElementById('userPostsHistoryModal');
+                const container = document.getElementById('historyPostsContainer');
+                const authorAvatar = document.getElementById('historyAuthorAvatar');
+                const authorName = document.getElementById('historyAuthorName');
+                
+                authorAvatar.src = post.avatar;
+                authorName.textContent = post.authorName;
+                
+                container.innerHTML = '';
+                
+                history.forEach(historyPost => {
+                    const postCard = document.createElement('div');
+                    postCard.className = 'post-card';
+                    const uniqueId = generatePostId(historyPost.id);
+                    const progress = 100; // Полностью заполнена
+                    postCard.innerHTML = `
+                        <img src="${historyPost.image}" alt="${historyPost.title}" class="post-image">
+                        <div class="post-content">
+                            <div class="post-author">
+                                <img src="${post.avatar}" alt="${post.authorName}" class="post-avatar">
+                                <div class="post-author-info">
+                                    <div class="post-author-name">${post.authorName}</div>
+                                </div>
+                            </div>
+                            <h3 class="post-title">${historyPost.title}</h3>
+                            <p style="color: #94a3b8; font-size: 13px; margin: 8px 0; line-height: 1.5;">${historyPost.description}</p>
+                            <div class="post-amount" style="--progress-width: ${progress}%">
+                                <div class="post-amount-content">
+                                    <span class="post-amount-collected">${historyPost.collected.toLocaleString('ru-RU')}<span class="post-amount-currency">₽</span></span>
+                                    <span class="post-amount-target">${historyPost.amount.toLocaleString('ru-RU')}<span class="post-amount-currency">₽</span></span>
+                                </div>
+                            </div>
+                            <div style="color: #10b981; font-size: 12px; margin-top: 8px; font-weight: 600;">✓ Сбор завершен</div>
+                        </div>
+                        <div class="post-id">ID: ${uniqueId}</div>
+                    `;
+                    container.appendChild(postCard);
+                });
+                
+                modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
             }
 
@@ -4179,6 +4391,21 @@
                 postDetail.classList.remove('active');
                 document.body.style.overflow = 'auto';
                 currentPost = null;
+            });
+
+            // Обработчик закрытия модального окна истории постов
+            document.getElementById('closeHistoryModal').addEventListener('click', () => {
+                const modal = document.getElementById('userPostsHistoryModal');
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+
+            // Закрытие модального окна истории постов при клике вне его
+            document.getElementById('userPostsHistoryModal').addEventListener('click', (e) => {
+                if (e.target.id === 'userPostsHistoryModal') {
+                    e.target.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
             });
 
             postDetail.addEventListener('click', (e) => {
@@ -4191,248 +4418,207 @@
 
 
 
-            const chatsList = document.getElementById('chatsList');
-            const emptyChats = document.getElementById('emptyChats');
-            const closeChat = document.getElementById('closeChat');
-            const chatMessages = document.getElementById('chatMessages');
-            const chatInput = document.getElementById('chatInput');
-            const sendMessage = document.getElementById('sendMessage');
-            const chatAttachment = document.getElementById('chatAttachment');
-            const emojiButtons = document.querySelectorAll('.emoji-btn');
-            let pendingAttachment = null;
             let currentPost = null;
-            let currentChatPost = null;
 
-            const formatChatDate = (date) => {
-                const today = new Date();
-                const messageDate = new Date(date);
-                
-                today.setHours(0, 0, 0, 0);
-                messageDate.setHours(0, 0, 0, 0);
-                
-                const diffTime = today - messageDate;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                if (diffDays === 0) {
-                    return 'Сегодня';
-                } else if (diffDays === 1) {
-                    return 'Вчера';
-                } else {
-                    return messageDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-                }
-            };
+            // Support Chat functionality
+            const supportChatContainer = document.getElementById('supportChatContainer');
+            const supportChatMessages = document.getElementById('supportChatMessages');
+            const supportChatInput = document.getElementById('supportChatInput');
+            const supportChatSendBtn = document.getElementById('supportChatSendBtn');
+            const closeSupportChatBtn = document.getElementById('closeSupportChat');
+            let supportChatMessagesList = [];
+            let waitingForUserResponse = false;
 
-            const formatMessageTime = (date) => {
+            function formatSupportMessageTime(date) {
                 return new Date(date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            };
+            }
 
-            const hasUnreadMessages = () => {
-                const chats = getFromLocalStorage('activeChats') || [];
-                for (const chat of chats) {
-                    const messages = getFromLocalStorage(`chat_${chat.postId}`) || [];
-                    const unreadCount = messages.filter(m => !m.isOwn && !m.read).length;
-                    if (unreadCount > 0) return true;
-                }
-                return false;
-            };
+            function addSupportMessage(text, isUser = false) {
+                const message = {
+                    text: text,
+                    isUser: isUser,
+                    timestamp: new Date().toISOString()
+                };
+                supportChatMessagesList.push(message);
+                // Сохраняем сообщения в localStorage
+                saveToLocalStorage('supportChatMessages', supportChatMessagesList);
+                renderSupportMessages();
+                supportChatMessages.scrollTop = supportChatMessages.scrollHeight;
+            }
 
-            const updateNotificationBadge = () => {
-                const badge = document.getElementById('chatsNotificationBadge');
-                if (hasUnreadMessages()) {
-                    badge.style.display = 'block';
-                } else {
-                    badge.style.display = 'none';
-                }
-            };
-            
-            const renderChatsList = () => {
-                const chats = getFromLocalStorage('activeChats') || [];
-                chatsList.innerHTML = '';
-                
-                if (chats.length === 0) {
-                    emptyChats.style.display = 'block';
-                    chatsList.style.display = 'none';
-                } else {
-                    emptyChats.style.display = 'none';
-                    chatsList.style.display = 'flex';
+            function renderSupportMessages() {
+                supportChatMessages.innerHTML = '';
+                supportChatMessagesList.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `support-chat-message ${msg.isUser ? 'user' : ''}`;
                     
-                    chats.forEach(chat => {
-                        const post = charityPosts.find(p => p.id === chat.postId);
-                        if (!post) return;
-                        
-                        const messages = getFromLocalStorage(`chat_${post.id}`) || [];
-                        const unreadCount = messages.filter(m => !m.isOwn && !m.read).length;
-                        
-                        let lastMessageText = 'Начните диалог';
-                        if (messages.length > 0) {
-                            const lastMsg = messages[messages.length - 1];
-                            if (lastMsg.text) {
-                                lastMessageText = lastMsg.text.length > 50 ? lastMsg.text.substring(0, 50) + '...' : lastMsg.text;
-                            } else if (lastMsg.attachment) {
-                                lastMessageText = 'Изображение';
-                            }
-                        }
-                        
-                        const chatItem = document.createElement('div');
-                        chatItem.className = 'chat-item';
-                        chatItem.innerHTML = `
-                            <img src="${post.avatar}" alt="" class="chat-item-avatar">
-                            <div class="chat-item-info">
-                                <div class="chat-item-name">${post.authorName}</div>
-                                <div class="chat-item-last-message">${lastMessageText}</div>
-                            </div>
-                            ${unreadCount > 0 ? '<span class="chat-item-notification"></span>' : ''}
+                    const avatarDiv = document.createElement('div');
+                    avatarDiv.className = `support-chat-message-avatar ${msg.isUser ? 'user' : 'operator'}`;
+                    if (!msg.isUser) {
+                        avatarDiv.innerHTML = `
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                            </svg>
                         `;
-                        
-                        chatItem.addEventListener('click', () => {
-                            openChatInTab(post);
-                        });
-                        
-                        chatsList.appendChild(chatItem);
-                    });
-                }
-                
-                updateNotificationBadge();
-            }
-
-            function openChatInTab(post) {
-                currentChatPost = post;
-                
-                document.getElementById('chatsListView').classList.add('hidden');
-                document.getElementById('chatView').classList.add('active');
-                
-                document.getElementById('chatRecipientAvatar').src = post.avatar;
-                document.getElementById('chatRecipientName').textContent = post.authorName;
-                
-                renderMessages(post.id);
-                
-                // Mark messages as read
-                const messages = getFromLocalStorage(`chat_${post.id}`) || [];
-                messages.forEach(m => {
-                    if (!m.isOwn) m.read = true;
-                });
-                saveToLocalStorage(`chat_${post.id}`, messages);
-                updateNotificationBadge();
-            }
-
-            document.getElementById('chatBackBtn').addEventListener('click', () => {
-                document.getElementById('chatView').classList.remove('active');
-                document.getElementById('chatsListView').classList.remove('hidden');
-                renderChatsList();
-            });
-
-            function renderMessages(postId) {
-                const messages = getFromLocalStorage(`chat_${postId}`) || [];
-                chatMessages.innerHTML = '';
-                
-                let lastDate = null;
-                
-                messages.forEach((msg, index) => {
-                    const messageDate = formatChatDate(msg.timestamp);
-                    
-                    if (messageDate !== lastDate) {
-                        const dateSeparator = document.createElement('div');
-                        dateSeparator.className = 'chat-date-separator';
-                        dateSeparator.innerHTML = `<span class="chat-date-text">${messageDate}</span>`;
-                        chatMessages.appendChild(dateSeparator);
-                        lastDate = messageDate;
+                    } else {
+                        avatarDiv.innerHTML = `
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        `;
                     }
                     
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `chat-message ${msg.isOwn ? 'own' : ''}`;
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'support-chat-message-content';
+                    contentDiv.textContent = msg.text;
                     
-                    const post = charityPosts.find(p => p.id === postId);
-                    const avatarSrc = msg.isOwn ? (getFromLocalStorage('userProfile')?.photo || '/placeholder.svg') : post.avatar;
+                    const timeDiv = document.createElement('div');
+                    timeDiv.className = 'support-chat-message-time';
+                    timeDiv.textContent = formatSupportMessageTime(msg.timestamp);
                     
-                    let messageContent = `
-                        <img src="${avatarSrc}" alt="" class="message-avatar">
-                        <div>
-                            <div class="message-bubble">
-                                <div class="message-text">${msg.text || ''}</div>
-                                ${msg.attachment ? `<img src="${msg.attachment}" class="message-attachment">` : ''}
-                                <div class="message-time">${formatMessageTime(msg.timestamp)}${msg.edited ? ' (ред.)' : ''}</div>
-                            </div>
-                            ${msg.isOwn ? `
-                            <div class="message-actions">
-                                <button class="message-edit-btn" onclick="editMessage(${postId}, ${index})">Редактировать</button>
-                            </div>
-                            ` : ''}
-                        </div>
-                    `;
+                    const textWrapper = document.createElement('div');
+                    textWrapper.appendChild(contentDiv);
+                    textWrapper.appendChild(timeDiv);
                     
-                    messageDiv.innerHTML = messageContent;
-                    chatMessages.appendChild(messageDiv);
+                    messageDiv.appendChild(avatarDiv);
+                    messageDiv.appendChild(textWrapper);
+                    supportChatMessages.appendChild(messageDiv);
                 });
-                
-                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
-            window.editMessage = function(postId, messageIndex) {
-                const messages = getFromLocalStorage(`chat_${postId}`) || [];
-                const message = messages[messageIndex];
+            function openSupportChat(problemType = null) {
+                // Загружаем сохраненные сообщения, если они есть
+                const savedMessages = getFromLocalStorage('supportChatMessages');
                 
-                if (!message.isOwn) return;
-                
-                const newText = prompt('Редактировать сообщение:', message.text);
-                if (newText !== null && newText.trim() !== '') {
-                    message.text = newText.trim();
-                    message.edited = true;
-                    saveToLocalStorage(`chat_${postId}`, messages);
-                    renderMessages(postId);
+                if (savedMessages && savedMessages.length > 0) {
+                    supportChatMessagesList = savedMessages;
+                    renderSupportMessages();
+                    // Проверяем, было ли последнее сообщение от поддержки с финальным ответом
+                    const lastMessage = savedMessages[savedMessages.length - 1];
+                    if (lastMessage && !lastMessage.isUser && lastMessage.text.includes('Спасибо за описание проблемы')) {
+                        waitingForUserResponse = false;
+                    } else {
+                        waitingForUserResponse = true;
+                    }
+                } else {
+                    supportChatMessagesList = [];
+                    waitingForUserResponse = false;
                 }
-            };
+                
+                supportChatContainer.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                // Если это новый чат (нет сохраненных сообщений)
+                if (!savedMessages || savedMessages.length === 0) {
+                    if (problemType === 'other') {
+                        // Для "Иное" - поддержка пишет первой
+                        setTimeout(() => {
+                            addSupportMessage('Здравствуйте! Опишите вашу проблему.', false);
+                            waitingForUserResponse = true;
+                        }, 500);
+                    } else if (problemType) {
+                        // Для остальных категорий - пользователь пишет первой
+                        const problemMessages = {
+                            'auth': 'Здравствуйте! У меня проблема с авторизацией.',
+                            'sendMoney': 'Здравствуйте! У меня проблема с переводом денежных средств.',
+                            'receiveMoney': 'Здравствуйте! У меня проблема с получением средств.'
+                        };
+                        
+                        const message = problemMessages[problemType] || 'Здравствуйте! У меня проблема.';
+                        setTimeout(() => {
+                            addSupportMessage(message, true);
+                            setTimeout(() => {
+                                addSupportMessage('Здравствуйте! Опишите проблему.', false);
+                                waitingForUserResponse = true;
+                            }, 1000);
+                        }, 500);
+                    }
+                }
+            }
 
-            function sendChatMessage() {
-                if (!currentChatPost) return;
+            function sendSupportMessage() {
+                const text = supportChatInput.value.trim();
+                if (!text) return;
                 
-                const input = chatInput;
-                const text = input.value.trim();
-                
-                if (text || pendingAttachment) {
-                    const messages = getFromLocalStorage(`chat_${currentChatPost.id}`) || [];
-                    messages.push({
-                        text: text,
-                        attachment: pendingAttachment,
-                        isOwn: true,
-                        timestamp: new Date().toISOString(),
-                        read: true,
-                        edited: false
-                    });
-                    saveToLocalStorage(`chat_${currentChatPost.id}`, messages);
+                // Если ожидается ответ пользователя, отправляем сообщение
+                if (waitingForUserResponse) {
+                    addSupportMessage(text, true);
+                    supportChatInput.value = '';
+                    waitingForUserResponse = false;
                     
-                    input.value = '';
-                    pendingAttachment = null; // Clear pending attachment
-                    renderMessages(currentChatPost.id);
+                    // Автоматический ответ поддержки
+                    setTimeout(() => {
+                        addSupportMessage('Спасибо за описание проблемы. Поддержка сразу же ответит, как только освободится.', false);
+                    }, 1000);
+                } else {
+                    // Если поддержка уже ответила, просто отправляем сообщение пользователя
+                    addSupportMessage(text, true);
+                    supportChatInput.value = '';
                 }
             }
+
+            // Обработчики кликов на категории
+            document.getElementById('authProblems').addEventListener('click', () => {
+                openSupportChat('auth');
+            });
+
+            document.getElementById('sendMoneyProblems').addEventListener('click', () => {
+                openSupportChat('sendMoney');
+            });
+
+            document.getElementById('receiveMoneyProblems').addEventListener('click', () => {
+                openSupportChat('receiveMoney');
+            });
+
+            document.getElementById('otherProblems').addEventListener('click', () => {
+                openSupportChat('other');
+            });
+
+            // Обработчик клика на полоску чата
+            document.getElementById('supportChatItem').addEventListener('click', () => {
+                openSupportChat();
+            });
+
+            // Обработчики для чата
+            supportChatSendBtn.addEventListener('click', sendSupportMessage);
             
-            document.getElementById('sendMessage').addEventListener('click', sendChatMessage);
-            
-            // Send message on Enter key
-            chatInput.addEventListener('keypress', (e) => {
+            supportChatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    sendChatMessage();
+                    sendSupportMessage();
                 }
             });
 
-            chatAttachment.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        pendingAttachment = event.target.result;
-                        // Optionally display a preview or confirmation here
-                        console.log("Attachment ready to send.");
-                    };
-                    reader.readAsDataURL(file);
+            function closeSupportChat() {
+                supportChatContainer.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                
+                // Скрываем категории и показываем полоску чата
+                const supportCategories = document.getElementById('supportCategories');
+                const supportChatItem = document.getElementById('supportChatItem');
+                
+                if (supportCategories && supportChatItem) {
+                    supportCategories.style.display = 'none';
+                    supportChatItem.style.display = 'flex';
+                    
+                    // Обновляем последнее сообщение в полоске
+                    if (supportChatMessagesList.length > 0) {
+                        const lastMessage = supportChatMessagesList[supportChatMessagesList.length - 1];
+                        const lastMessageText = lastMessage.text.length > 50 
+                            ? lastMessage.text.substring(0, 50) + '...' 
+                            : lastMessage.text;
+                        document.getElementById('supportChatLastMessage').textContent = lastMessageText;
+                    }
                 }
-            });
+            }
 
-            emojiButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    chatInput.value += button.dataset.emoji;
-                });
+            closeSupportChatBtn.addEventListener('click', closeSupportChat);
+
+            supportChatContainer.addEventListener('click', (e) => {
+                if (e.target === supportChatContainer) {
+                    closeSupportChat();
+                }
             });
 
             function showPostDetail(postId) {
@@ -4458,18 +4644,24 @@
                 const uniqueId = generatePostId(post.id);
                 document.getElementById('detailPostId').textContent = `ID: ${uniqueId}`;
                 
+                // Добавляем обработчик клика на аватар/имя для показа истории постов
+                const authorSection = document.getElementById('detailAuthorSection');
+                if (userPostsHistory[post.id]) {
+                    authorSection.style.cursor = 'pointer';
+                    authorSection.onclick = (e) => {
+                        e.stopPropagation();
+                        showUserPostsHistory(post);
+                    };
+                } else {
+                    authorSection.style.cursor = 'default';
+                    authorSection.onclick = null;
+                }
+                
                 postDetail.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
 
 
-            // Update notification badge on page load
-            updateNotificationBadge();
-
-            // Render initial chats list if 'chats' tab is active on load
-            if (document.getElementById('chats').classList.contains('active')) {
-                renderChatsList();
-            }
 
             // Rating functions
             function initializeRating() {
@@ -4684,18 +4876,36 @@
                                 </div>
                                 <div style="margin-bottom: 24px;">
                                     <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 12px;">Фото/видео *</label>
-                                    <div style="border: 2px dashed #334155; border-radius: 12px; padding: 32px; text-align: center; cursor: pointer;" id="mediaUploadArea">
-                                        <svg style="width: 48px; height: 48px; stroke: #64748b; margin: 0 auto 12px;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <div id="mediaUploadArea" style="border: 2px dashed #334155; border-radius: 16px; padding: 24px; background: rgba(15, 23, 42, 0.55); text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 240px; position: relative;">
+                                        <div id="mediaEmptyState" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #64748b;">
+                                            <svg style="width: 48px; height: 48px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
                                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                             <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                             <polyline points="21 15 16 10 5 21"></polyline>
                                         </svg>
+                                            <div>
                                         <p style="color: #f1f5f9; font-size: 14px; margin-bottom: 4px;">Загрузите медиа</p>
                                         <p style="color: #64748b; font-size: 12px;">Можно загрузить до 3 фото или видео</p>
+                                            </div>
+                                        </div>
+                                        <div id="mediaSlider" style="display: none; width: 100%; height: 220px; position: relative; border-radius: 16px; overflow: hidden; background: rgba(10, 14, 39, 0.6);">
+                                            <button type="button" id="mediaArrowPrev" style="display: none; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; align-items: center; justify-content: center;">
+                                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                                    <path d="M15 18l-6-6 6-6"></path>
+                                                </svg>
+                                            </button>
+                                            <div id="mediaMainContent" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"></div>
+                                            <button type="button" id="mediaArrowNext" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; align-items: center; justify-content: center;">
+                                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                                    <path d="M9 6l6 6-6 6"></path>
+                                                </svg>
+                                            </button>
+                                            <button type="button" id="mediaRemoveBtn" style="display: none; position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(239, 68, 68, 0.95); color: #ffffff; border: none; font-size: 18px; font-weight: 600; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);">×</button>
+                                            <div id="mediaMainCounter" style="display: none; position: absolute; bottom: 16px; right: 18px; padding: 6px 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.85); color: #cbd5f5; font-size: 12px; font-weight: 600;"></div>
+                                        </div>
                                     </div>
                                     <input type="file" id="postMedia" accept="image/*,video/*" multiple style="display: none;">
-                                    <div id="mediaPreview" style="margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;"></div>
-                                    <p id="mediaCount" style="color: #64748b; font-size: 12px; margin-top: 8px; text-align: center;">Загружено: 0 / 3</p>
+                                    <p id="mediaCount" style="color: #64748b; font-size: 12px; margin-top: 4px; text-align: center;">Загружено: 0 / 3</p>
                                     <p id="mediaError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Необходимо загрузить хотя бы одно фото или видео</p>
                                 </div>
                                 
@@ -4710,22 +4920,6 @@
                                     <textarea id="postDescription" required placeholder="Подробно опишите вашу ситуацию..." maxlength="10000" style="width: 100%; min-height: 200px; padding: 12px 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
                                     <p style="color: #64748b; font-size: 12px; text-align: right; margin-top: 4px;"><span id="charCount">0</span> / 10 000</p>
                                     <p id="descriptionError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или описание должно содержать минимум 50 символов и начинаться с большой буквы</p>
-                                </div>
-                                
-                                <div style="margin-bottom: 24px;">
-                                    <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Реквизиты для получения помощи *</label>
-                                    
-                                    <div style="margin-bottom: 16px;">
-                                        <label style="display: block; color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Банк</label>
-                                        <input type="text" id="postBank" required placeholder="Название банка" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px;">
-                                        <p id="bankError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или название банка должно начинаться с большой буквы</p>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 16px;">
-                                        <label style="display: block; color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Номер телефона</label>
-                                        <input type="tel" id="postPhone" required placeholder="+7 (___) ___-__-__" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px;">
-                                        <p id="phoneError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или введите корректный номер телефона</p>
-                                    </div>
                                 </div>
                                 
                                 <div style="margin-bottom: 24px;">
@@ -4766,100 +4960,163 @@
                 // Media upload
                 const mediaUploadArea = document.getElementById('mediaUploadArea');
                 const postMedia = document.getElementById('postMedia');
-                const mediaPreview = document.getElementById('mediaPreview');
+                const mediaCountEl = document.getElementById('mediaCount');
+                const mediaError = document.getElementById('mediaError');
+                const mediaEmptyState = document.getElementById('mediaEmptyState');
+                const mediaSlider = document.getElementById('mediaSlider');
+                const mediaMainContent = document.getElementById('mediaMainContent');
+                const mediaArrowPrev = document.getElementById('mediaArrowPrev');
+                const mediaArrowNext = document.getElementById('mediaArrowNext');
+                const mediaMainCounter = document.getElementById('mediaMainCounter');
+                const mediaRemoveBtn = document.getElementById('mediaRemoveBtn');
+                
+                let selectedMedia = [];
+                let currentMediaIndex = 0;
+                
+                function updateFileInput() {
+                    const dt = new DataTransfer();
+                    selectedMedia.forEach(item => dt.items.add(item.file));
+                    postMedia.files = dt.files;
+                    if (selectedMedia.length === 0) {
+                        postMedia.value = '';
+                    }
+                }
+                
+                function renderMediaPreview() {
+                    const total = selectedMedia.length;
+                    mediaCountEl.textContent = `Загружено: ${total} / 3`;
+                    
+                    mediaEmptyState.style.display = total ? 'none' : 'flex';
+                    mediaSlider.style.display = total ? 'block' : 'none';
+                    mediaRemoveBtn.style.display = total ? 'flex' : 'none';
+                    mediaMainCounter.style.display = total ? 'inline-flex' : 'none';
+                    mediaMainContent.innerHTML = '';
+                    
+                    if (!total) {
+                        mediaArrowPrev.style.display = 'none';
+                        mediaArrowNext.style.display = 'none';
+                        mediaUploadArea.style.borderColor = '#334155';
+                        if (mediaError) mediaError.style.display = 'none';
+                        currentMediaIndex = 0;
+                        return;
+                    }
+                    
+                    if (currentMediaIndex >= total) {
+                        currentMediaIndex = total - 1;
+                    }
+                    if (currentMediaIndex < 0) currentMediaIndex = 0;
+                    
+                    const currentMedia = selectedMedia[currentMediaIndex];
+                    const mediaType = (currentMedia.type || '').toLowerCase();
+                    
+                    if (currentMedia && currentMedia.previewUrl) {
+                        if (mediaType.startsWith('video') || currentMedia.previewUrl.startsWith('data:video')) {
+                            mediaMainContent.innerHTML = `
+                                <video src="${currentMedia.previewUrl}" style="width: 100%; height: 100%; object-fit: cover;" controls playsinline></video>
+                            `;
+                        } else {
+                            mediaMainContent.innerHTML = `
+                                <img src="${currentMedia.previewUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Загруженное медиа">
+                            `;
+                        }
+                    } else {
+                        mediaMainContent.innerHTML = `
+                            <div style="color: #64748b; font-size: 13px;">Загрузка...</div>
+                        `;
+                    }
+                    
+                    mediaMainCounter.textContent = `${currentMediaIndex + 1} / ${total}`;
+                    mediaUploadArea.style.borderColor = '#334155';
+                    if (mediaError && total > 0) {
+                        mediaError.style.display = 'none';
+                    }
+                    
+                    if (total === 1) {
+                        mediaArrowPrev.style.display = 'none';
+                        mediaArrowNext.style.display = 'flex';
+                    } else {
+                        mediaArrowPrev.style.display = currentMediaIndex === 0 ? 'none' : 'flex';
+                        mediaArrowNext.style.display = currentMediaIndex === total - 1 ? 'none' : 'flex';
+                    }
+                }
                 
                 mediaUploadArea.addEventListener('click', () => {
                     postMedia.click();
                 });
                 
+                mediaArrowPrev.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (selectedMedia.length < 2) return;
+                    currentMediaIndex = (currentMediaIndex - 1 + selectedMedia.length) % selectedMedia.length;
+                    renderMediaPreview();
+                });
+                
+                mediaArrowNext.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (selectedMedia.length < 2) return;
+                    currentMediaIndex = (currentMediaIndex + 1) % selectedMedia.length;
+                    renderMediaPreview();
+                });
+                
+                mediaRemoveBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (!selectedMedia.length) return;
+                    selectedMedia.splice(currentMediaIndex, 1);
+                    updateFileInput();
+                    if (currentMediaIndex >= selectedMedia.length) {
+                        currentMediaIndex = selectedMedia.length - 1;
+                    }
+                    renderMediaPreview();
+                });
+                
                 postMedia.addEventListener('change', (e) => {
-                    const files = Array.from(e.target.files).slice(0, 3); // Ограничиваем до 3 файлов
-                    if (files.length === 0) return;
+                    const originalFiles = Array.from(e.target.files);
                     
-                    if (files.length > 3) {
-                        alert('Можно загрузить максимум 3 файла');
+                    if (originalFiles.length === 0) {
+                        selectedMedia = [];
+                        currentMediaIndex = 0;
+                        updateFileInput();
+                        renderMediaPreview();
                         return;
                     }
                     
-                    mediaPreview.innerHTML = '';
-                    const mediaCountEl = document.getElementById('mediaCount');
+                    if (originalFiles.length > 3) {
+                        alert('Можно загрузить максимум 3 файла');
+                    }
                     
-                    files.forEach((file, index) => {
+                    const files = originalFiles.slice(0, 3);
+                    selectedMedia = files.map(file => ({
+                        file,
+                        type: file.type || '',
+                        previewUrl: null
+                    }));
+                    currentMediaIndex = 0;
+                    
+                                const dt = new DataTransfer();
+                    files.forEach(file => dt.items.add(file));
+                                postMedia.files = dt.files;
+                    
+                    renderMediaPreview();
+                    
+                    let loadedCount = 0;
+                    selectedMedia.forEach((item, index) => {
                         const reader = new FileReader();
                         reader.onload = (event) => {
-                            const mediaWrapper = document.createElement('div');
-                            mediaWrapper.style.cssText = 'position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #334155;';
-                            
-                            if (file.type.startsWith('image/')) {
-                                mediaWrapper.innerHTML = `
-                                    <img src="${event.target.result}" style="width: 100%; height: 150px; object-fit: cover; display: block;">
-                                    <button type="button" class="remove-media-btn" data-index="${index}" style="position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(239, 68, 68, 0.9); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: bold;">×</button>
-                                `;
-                            } else if (file.type.startsWith('video/')) {
-                                mediaWrapper.innerHTML = `
-                                    <video src="${event.target.result}" style="width: 100%; height: 150px; object-fit: cover; display: block;" controls></video>
-                                    <button type="button" class="remove-media-btn" data-index="${index}" style="position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(239, 68, 68, 0.9); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: bold;">×</button>
-                                `;
+                            selectedMedia[index].previewUrl = event.target.result;
+                            loadedCount++;
+                            if (loadedCount === selectedMedia.length) {
+                                renderMediaPreview();
                             }
-                            
-                            mediaPreview.appendChild(mediaWrapper);
-                            
-                            // Обновляем счетчик
-                            const currentCount = mediaPreview.children.length;
-                            mediaCountEl.textContent = `Загружено: ${currentCount} / 3`;
-                            
-                            // Скрываем ошибку медиа, если файлы загружены
-                            if (currentCount > 0) {
-                                document.getElementById('mediaError').style.display = 'none';
-                                document.getElementById('mediaUploadArea').style.borderColor = '#334155';
-                            }
-                            
-                            // Обработчик удаления медиа
-                            const removeBtn = mediaWrapper.querySelector('.remove-media-btn');
-                            removeBtn.addEventListener('click', () => {
-                                mediaWrapper.remove();
-                                const newCount = mediaPreview.children.length;
-                                mediaCountEl.textContent = `Загружено: ${newCount} / 3`;
-                                
-                                // Обновляем input files
-                                const dt = new DataTransfer();
-                                Array.from(postMedia.files).forEach((f, i) => {
-                                    if (i !== index) dt.items.add(f);
-                                });
-                                postMedia.files = dt.files;
-                            });
                         };
-                        reader.readAsDataURL(file);
+                        reader.readAsDataURL(item.file);
                     });
                 });
+                
+                renderMediaPreview();
                 
                 // Character counter
                 document.getElementById('postDescription').addEventListener('input', (e) => {
                     document.getElementById('charCount').textContent = e.target.value.length.toLocaleString('ru-RU');
-                });
-                
-                // Phone formatting
-                document.getElementById('postPhone').addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\D/g, '');
-                    if (value.length > 0) {
-                        if (value[0] !== '7') {
-                            value = '7' + value;
-                        }
-                        let formatted = '+7';
-                        if (value.length > 1) {
-                            formatted += ' (' + value.substring(1, 4);
-                        }
-                        if (value.length >= 5) {
-                            formatted += ') ' + value.substring(4, 7);
-                        }
-                        if (value.length >= 8) {
-                            formatted += '-' + value.substring(7, 9);
-                        }
-                        if (value.length >= 10) {
-                            formatted += '-' + value.substring(9, 11);
-                        }
-                        e.target.value = formatted;
-                    }
                 });
                 
                 // Validation functions
@@ -4885,27 +5142,6 @@
                     }
                     if (description.trim().length < 50) {
                         return { valid: false, message: 'Описание должно содержать минимум 50 символов' };
-                    }
-                    return { valid: true };
-                }
-                
-                function validateBank(bank) {
-                    if (!bank || bank.trim().length === 0) {
-                        return { valid: false, message: 'Поле не заполнено' };
-                    }
-                    if (!/^[А-ЯЁA-Z]/.test(bank.trim())) {
-                        return { valid: false, message: 'Название банка должно начинаться с большой буквы' };
-                    }
-                    return { valid: true };
-                }
-                
-                function validatePhone(phone) {
-                    if (!phone || phone.trim().length === 0) {
-                        return { valid: false, message: 'Поле не заполнено' };
-                    }
-                    const digits = phone.replace(/\D/g, '');
-                    if (digits.length !== 11 || !digits.startsWith('7')) {
-                        return { valid: false, message: 'Введите корректный номер телефона' };
                     }
                     return { valid: true };
                 }
@@ -4936,30 +5172,6 @@
                 document.getElementById('postDescription').addEventListener('blur', (e) => {
                     const result = validateDescription(e.target.value);
                     const errorEl = document.getElementById('descriptionError');
-                    if (!result.valid) {
-                        errorEl.style.display = 'block';
-                        e.target.style.borderColor = '#ef4444';
-                    } else {
-                        errorEl.style.display = 'none';
-                        e.target.style.borderColor = '#334155';
-                    }
-                });
-                
-                document.getElementById('postBank').addEventListener('blur', (e) => {
-                    const result = validateBank(e.target.value);
-                    const errorEl = document.getElementById('bankError');
-                    if (!result.valid) {
-                        errorEl.style.display = 'block';
-                        e.target.style.borderColor = '#ef4444';
-                    } else {
-                        errorEl.style.display = 'none';
-                        e.target.style.borderColor = '#334155';
-                    }
-                });
-                
-                document.getElementById('postPhone').addEventListener('blur', (e) => {
-                    const result = validatePhone(e.target.value);
-                    const errorEl = document.getElementById('phoneError');
                     if (!result.valid) {
                         errorEl.style.display = 'block';
                         e.target.style.borderColor = '#ef4444';
@@ -5079,11 +5291,10 @@
                     }
                     
                     // Validate media
-                    const mediaElements = document.getElementById('mediaPreview').querySelectorAll('img, video');
-                    const mediaArray = Array.from(mediaElements).map(el => el.src);
                     const mediaError = document.getElementById('mediaError');
+                    const mediaArray = selectedMedia.map(item => item.previewUrl).filter(Boolean);
                     
-                    if (mediaArray.length === 0) {
+                    if (selectedMedia.length === 0 || mediaArray.length === 0) {
                         mediaError.style.display = 'block';
                         document.getElementById('mediaUploadArea').style.borderColor = '#ef4444';
                         return;
@@ -5109,22 +5320,6 @@
                         return;
                     }
                     
-                    const bank = document.getElementById('postBank').value;
-                    const bankResult = validateBank(bank);
-                    if (!bankResult.valid) {
-                        document.getElementById('bankError').style.display = 'block';
-                        document.getElementById('postBank').style.borderColor = '#ef4444';
-                        return;
-                    }
-                    
-                    const phone = document.getElementById('postPhone').value;
-                    const phoneResult = validatePhone(phone);
-                    if (!phoneResult.valid) {
-                        document.getElementById('phoneError').style.display = 'block';
-                        document.getElementById('postPhone').style.borderColor = '#ef4444';
-                        return;
-                    }
-                    
                     const amount = document.getElementById('postAmount').value;
                     const amountResult = validateAmount(amount);
                     if (!amountResult.valid) {
@@ -5143,9 +5338,8 @@
                         title: document.getElementById('postTitle').value,
                         description: document.getElementById('postDescription').value,
                         amount: parseInt(document.getElementById('postAmount').value),
-                        bank: document.getElementById('postBank').value,
-                        phone: document.getElementById('postPhone').value,
                         media: mediaArray, // Массив медиа файлов
+                        mediaTypes: selectedMedia.map(item => item.type || ''),
                         authorName: displayName,
                         authorFull: `${firstName} ${lastName}`.trim(),
                         avatar: verificationData.userPhoto,
@@ -5176,52 +5370,475 @@
                 const userPost = getFromLocalStorage('userPost');
                 if (!userPost) return;
                 
-                // Отображаем медиа в галерее
                 const mediaGallery = document.getElementById('userPostMediaGallery');
                 mediaGallery.innerHTML = '';
                 
-                if (userPost.media && Array.isArray(userPost.media) && userPost.media.length > 0) {
-                    // Если медиа - массив
-                    userPost.media.forEach((mediaSrc, index) => {
-                        const mediaItem = document.createElement('div');
-                        mediaItem.style.cssText = 'width: 100%; height: 400px; position: relative; overflow: hidden;';
-                        
-                        if (mediaSrc.includes('data:video') || mediaSrc.endsWith('.mp4') || mediaSrc.endsWith('.webm')) {
-                            mediaItem.innerHTML = `<video src="${mediaSrc}" style="width: 100%; height: 100%; object-fit: cover;" controls></video>`;
+                const storedMedia = Array.isArray(userPost.media) ? userPost.media : (userPost.media ? [userPost.media] : []);
+                const mediaItems = storedMedia.filter(Boolean);
+                const mediaTypes = Array.isArray(userPost.mediaTypes) ? userPost.mediaTypes : [];
+                
+                if (mediaItems.length === 0) {
+                    mediaGallery.innerHTML = `
+                        <div style="height: 360px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 14px;">
+                            Медиа не прикреплены
+                        </div>
+                    `;
                         } else {
-                            mediaItem.innerHTML = `<img src="${mediaSrc}" style="width: 100%; height: 100%; object-fit: cover;" alt="Фото ${index + 1}">`;
-                        }
-                        
-                        mediaGallery.appendChild(mediaItem);
-                    });
-                } else if (userPost.media) {
-                    // Если медиа - строка (старый формат)
-                    const mediaItem = document.createElement('div');
-                    mediaItem.style.cssText = 'width: 100%; height: 400px; position: relative; overflow: hidden;';
+                    mediaGallery.innerHTML = `
+                        <div id="userPostMediaMain" style="position: relative; height: 420px; background: rgba(10, 14, 39, 0.65); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <button type="button" id="userPostMediaPrev" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; display: none; align-items: center; justify-content: center;">
+                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"></path>
+                                </svg>
+                            </button>
+                            <div id="userPostMediaContent" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"></div>
+                            <button type="button" id="userPostMediaNext" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; display: none; align-items: center; justify-content: center;">
+                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <path d="M9 6l6 6-6 6"></path>
+                                </svg>
+                            </button>
+                            <div id="userPostMediaCounter" style="position: absolute; bottom: 16px; right: 20px; padding: 6px 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.78); color: #cbd5f5; font-size: 12px; font-weight: 600; display: inline-flex;"></div>
+                        </div>
+                    `;
                     
-                    if (typeof userPost.media === 'string') {
-                        if (userPost.media.includes('data:video') || userPost.media.endsWith('.mp4') || userPost.media.endsWith('.webm')) {
-                            mediaItem.innerHTML = `<video src="${userPost.media}" style="width: 100%; height: 100%; object-fit: cover;" controls></video>`;
-                        } else {
-                            mediaItem.innerHTML = `<img src="${userPost.media}" style="width: 100%; height: 100%; object-fit: cover;" alt="Фото">`;
+                    const userPostMediaContent = document.getElementById('userPostMediaContent');
+                    const userPostMediaPrev = document.getElementById('userPostMediaPrev');
+                    const userPostMediaNext = document.getElementById('userPostMediaNext');
+                    const userPostMediaCounter = document.getElementById('userPostMediaCounter');
+                    
+                    let userPostMediaIndex = 0;
+                    
+                    const resolveMediaType = (index) => {
+                        const typeFromArray = typeof mediaTypes[index] === 'string' ? mediaTypes[index] : '';
+                        if (typeFromArray.startsWith('video/')) return 'video';
+                        if (typeFromArray.startsWith('image/')) return 'image';
+                        
+                        const src = mediaItems[index];
+                        if (typeof src === 'string') {
+                            const normalized = src.split('?')[0].toLowerCase();
+                            if (normalized.startsWith('data:video') || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(normalized)) {
+                                return 'video';
+                            }
                         }
-                        mediaGallery.appendChild(mediaItem);
-                    }
+                        return 'image';
+                    };
+                    
+                    const renderUserPostMedia = () => {
+                        const total = mediaItems.length;
+                        userPostMediaContent.innerHTML = '';
+                        userPostMediaCounter.textContent = `${userPostMediaIndex + 1} / ${total}`;
+                        
+                        const currentSrc = mediaItems[userPostMediaIndex];
+                        const currentType = resolveMediaType(userPostMediaIndex);
+                        
+                        if (currentType === 'video') {
+                            userPostMediaContent.innerHTML = `
+                                <video src="${currentSrc}" style="width: 100%; height: 100%; object-fit: cover;" controls playsinline></video>
+                            `;
+                        } else {
+                            userPostMediaContent.innerHTML = `
+                                <img src="${currentSrc}" style="width: 100%; height: 100%; object-fit: cover;" alt="Медиа ${userPostMediaIndex + 1}">
+                            `;
+                        }
+                        
+                        if (total === 1) {
+                            userPostMediaPrev.style.display = 'none';
+                            userPostMediaNext.style.display = 'flex';
+                        } else {
+                            userPostMediaPrev.style.display = userPostMediaIndex === 0 ? 'none' : 'flex';
+                            userPostMediaNext.style.display = userPostMediaIndex === total - 1 ? 'none' : 'flex';
+                        }
+                    };
+                    
+                    userPostMediaPrev.addEventListener('click', () => {
+                        if (userPostMediaIndex <= 0) return;
+                        userPostMediaIndex -= 1;
+                        renderUserPostMedia();
+                    });
+                    
+                    userPostMediaNext.addEventListener('click', () => {
+                        if (userPostMediaIndex >= mediaItems.length - 1) return;
+                        userPostMediaIndex += 1;
+                        renderUserPostMedia();
+                    });
+                    
+                    renderUserPostMedia();
                 }
                 
                 // Отображаем данные поста (только из поста, не из верификации)
-                document.getElementById('userPostAvatar').src = userPost.avatar || '/placeholder.svg';
-                document.getElementById('userPostAuthor').textContent = userPost.authorName || 'Пользователь';
-                document.getElementById('userPostTitle').textContent = userPost.title || '';
-                document.getElementById('userPostDescription').textContent = userPost.description || '';
-                document.getElementById('userPostRecipient').textContent = userPost.recipient || userPost.authorName || 'Пользователь';
-                document.getElementById('userPostBank').textContent = userPost.bank || '';
-                document.getElementById('userPostPhone').textContent = userPost.phone || '';
-                document.getElementById('userPostCollected').textContent = `Собрано: ${(userPost.collected || 0).toLocaleString('ru-RU')} ₽`;
-                document.getElementById('userPostAmount').textContent = (userPost.amount || 0).toLocaleString('ru-RU');
+                const avatarEl = document.getElementById('userPostAvatar');
+                const authorEl = document.getElementById('userPostAuthor');
+                const titleEl = document.getElementById('userPostTitle');
+                const descriptionEl = document.getElementById('userPostDescription');
+                const amountWrapper = document.getElementById('userPostAmountWrapper');
+                const collectedEl = document.getElementById('userPostCollected');
+                const amountEl = document.getElementById('userPostAmount');
+                const postIdEl = document.getElementById('userPostId');
+
+                const collected = userPost.collected || 0;
+                const amount = userPost.amount || 0;
+                const progress = amount > 0 ? Math.min((collected / amount) * 100, 100) : 0;
+
+                if (avatarEl) avatarEl.src = userPost.avatar || '/placeholder.svg';
+                if (authorEl) authorEl.textContent = userPost.authorName || 'Пользователь';
+                if (titleEl) titleEl.textContent = userPost.title || '';
+                if (descriptionEl) descriptionEl.textContent = userPost.description || '';
+                if (amountWrapper) amountWrapper.style.setProperty('--progress-width', `${progress}%`);
+                if (collectedEl) collectedEl.innerHTML = `${collected.toLocaleString('ru-RU')}<span class="post-amount-currency">₽</span>`;
+                if (amountEl) amountEl.innerHTML = `${amount.toLocaleString('ru-RU')}<span class="post-amount-currency">₽</span>`;
+                if (postIdEl) {
+                    const uniqueId = typeof generatePostId === 'function' ? generatePostId(userPost.id || Date.now()) : userPost.id;
+                    postIdEl.textContent = uniqueId ? `ID: ${uniqueId}` : '';
+                }
                 
-                const progress = userPost.amount > 0 ? ((userPost.collected || 0) / userPost.amount) * 100 : 0;
-                document.getElementById('userPostProgress').style.width = `${Math.min(progress, 100)}%`;
+                // Добавляем обработчик кнопки редактирования
+                const editBtn = document.getElementById('editPostBtn');
+                if (editBtn) {
+                    editBtn.onclick = () => showEditPostForm();
+                }
+            }
+            
+            function showEditPostForm() {
+                const userPost = getFromLocalStorage('userPost');
+                if (!userPost) return;
+                
+                const modal = document.createElement('div');
+                modal.id = 'editPostModal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(10, 14, 39, 0.95);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    padding: 20px;
+                    overflow-y: auto;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #0f1629; border: 1px solid #1e293b; border-radius: 24px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+                        <div style="padding: 32px;">
+                            <button id="closeEditPost" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: transparent; border: 1px solid #334155; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 16px; height: 16px; stroke: #f1f5f9;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                            
+                            <div style="text-align: center; margin-bottom: 32px;">
+                                <h2 style="color: #f1f5f9; font-size: 24px; font-weight: 700; margin-bottom: 8px;">Редактировать пост</h2>
+                                <p style="color: #64748b; font-size: 14px;">Измените название, описание или медиа</p>
+                            </div>
+                            
+                            <form id="editPostForm">
+                                <div style="margin-bottom: 24px;">
+                                    <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 12px;">Фото/видео *</label>
+                                    <div id="editMediaUploadArea" style="border: 2px dashed #334155; border-radius: 16px; padding: 24px; background: rgba(15, 23, 42, 0.55); text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 240px; position: relative;">
+                                        <div id="editMediaEmptyState" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #64748b;">
+                                            <svg style="width: 48px; height: 48px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                <polyline points="21 15 16 10 5 21"></polyline>
+                                            </svg>
+                                            <div>
+                                                <p style="color: #f1f5f9; font-size: 14px; margin-bottom: 4px;">Загрузите медиа</p>
+                                                <p style="color: #64748b; font-size: 12px;">Можно загрузить до 3 фото или видео</p>
+                                            </div>
+                                        </div>
+                                        <div id="editMediaSlider" style="display: none; width: 100%; height: 220px; position: relative; border-radius: 16px; overflow: hidden; background: rgba(10, 14, 39, 0.6);">
+                                            <button type="button" id="editMediaArrowPrev" style="display: none; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; align-items: center; justify-content: center;">
+                                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                                    <path d="M15 18l-6-6 6-6"></path>
+                                                </svg>
+                                            </button>
+                                            <div id="editMediaMainContent" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"></div>
+                                            <button type="button" id="editMediaArrowNext" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.75); color: #e2e8f0; cursor: pointer; align-items: center; justify-content: center;">
+                                                <svg style="width: 22px; height: 22px; stroke: currentColor;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                                    <path d="M9 6l6 6-6 6"></path>
+                                                </svg>
+                                            </button>
+                                            <button type="button" id="editMediaRemoveBtn" style="display: none; position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; background: rgba(239, 68, 68, 0.95); color: #ffffff; border: none; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);">×</button>
+                                            <div id="editMediaMainCounter" style="display: none; position: absolute; bottom: 16px; right: 18px; padding: 6px 12px; border-radius: 999px; background: rgba(15, 23, 42, 0.8); color: #cbd5f5; font-size: 12px; font-weight: 600;"></div>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="editPostMedia" accept="image/*,video/*" multiple style="display: none;">
+                                    <p id="editMediaCount" style="color: #64748b; font-size: 12px; margin-top: 4px; text-align: center;">Загружено: 0 / 3</p>
+                                    <p id="editMediaError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Необходимо загрузить хотя бы одно фото или видео</p>
+                                </div>
+                                
+                                <div style="margin-bottom: 24px;">
+                                    <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Название *</label>
+                                    <input type="text" id="editPostTitle" required placeholder="Краткое название вашей ситуации" style="width: 100%; height: 44px; padding: 0 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px;">
+                                    <p id="editTitleError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или название должно начинаться с большой буквы</p>
+                                </div>
+                                
+                                <div style="margin-bottom: 24px;">
+                                    <label style="display: block; color: #f1f5f9; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Описание *</label>
+                                    <textarea id="editPostDescription" required placeholder="Подробно опишите вашу ситуацию..." maxlength="10000" style="width: 100%; min-height: 200px; padding: 12px 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
+                                    <p style="color: #64748b; font-size: 12px; text-align: right; margin-top: 4px;"><span id="editCharCount">0</span> / 10 000</p>
+                                    <p id="editDescriptionError" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: none;">⚠️ Поле не заполнено или описание должно содержать минимум 50 символов и начинаться с большой буквы</p>
+                                </div>
+                                
+                                <button type="submit" style="width: 100%; height: 48px; background: #3b82f6; border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: 600; cursor: pointer;">
+                                    Сохранить изменения
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Заполняем форму текущими данными
+                document.getElementById('editPostTitle').value = userPost.title || '';
+                document.getElementById('editPostDescription').value = userPost.description || '';
+                document.getElementById('editCharCount').textContent = (userPost.description || '').length.toLocaleString('ru-RU');
+                
+                // Инициализируем медиа из существующего поста
+                const existingMedia = Array.isArray(userPost.media) ? userPost.media : (userPost.media ? [userPost.media] : []);
+                const existingMediaTypes = Array.isArray(userPost.mediaTypes) ? userPost.mediaTypes : [];
+                let editSelectedMedia = existingMedia.map((src, idx) => ({
+                    previewUrl: src,
+                    type: existingMediaTypes[idx] || 'image/jpeg',
+                    file: null
+                }));
+                let editCurrentMediaIndex = 0;
+                
+                // Функции для работы с медиа (аналогично форме создания)
+                const editMediaUploadArea = document.getElementById('editMediaUploadArea');
+                const editPostMedia = document.getElementById('editPostMedia');
+                const editMediaCountEl = document.getElementById('editMediaCount');
+                const editMediaError = document.getElementById('editMediaError');
+                const editMediaEmptyState = document.getElementById('editMediaEmptyState');
+                const editMediaSlider = document.getElementById('editMediaSlider');
+                const editMediaMainContent = document.getElementById('editMediaMainContent');
+                const editMediaMainPlaceholder = document.getElementById('editMediaMainPlaceholder');
+                const editMediaArrowPrev = document.getElementById('editMediaArrowPrev');
+                const editMediaArrowNext = document.getElementById('editMediaArrowNext');
+                const editMediaMainCounter = document.getElementById('editMediaMainCounter');
+                const editMediaRemoveBtn = document.getElementById('editMediaRemoveBtn');
+                
+                function updateEditFileInput() {
+                    const dt = new DataTransfer();
+                    editSelectedMedia.forEach(item => {
+                        if (item.file) dt.items.add(item.file);
+                    });
+                    editPostMedia.files = dt.files;
+                }
+                
+                function renderEditMediaPreview() {
+                    const total = editSelectedMedia.length;
+                    editMediaCountEl.textContent = `Загружено: ${total} / 3`;
+                    
+                    editMediaEmptyState.style.display = total ? 'none' : 'flex';
+                    editMediaSlider.style.display = total ? 'block' : 'none';
+                    editMediaRemoveBtn.style.display = total ? 'flex' : 'none';
+                    editMediaMainCounter.style.display = total ? 'inline-flex' : 'none';
+                    editMediaMainContent.innerHTML = '';
+                    
+                    if (!total) {
+                        editMediaArrowPrev.style.display = 'none';
+                        editMediaArrowNext.style.display = 'none';
+                        editMediaUploadArea.style.borderColor = '#334155';
+                        if (editMediaError) editMediaError.style.display = 'none';
+                        editCurrentMediaIndex = 0;
+                        return;
+                    }
+                    
+                    if (editCurrentMediaIndex >= total) {
+                        editCurrentMediaIndex = total - 1;
+                    }
+                    if (editCurrentMediaIndex < 0) editCurrentMediaIndex = 0;
+                    
+                    const currentMedia = editSelectedMedia[editCurrentMediaIndex];
+                    const mediaType = (currentMedia.type || '').toLowerCase();
+                    
+                    if (currentMedia && currentMedia.previewUrl) {
+                        if (mediaType.startsWith('video') || currentMedia.previewUrl.startsWith('data:video')) {
+                            editMediaMainContent.innerHTML = `
+                                <video src="${currentMedia.previewUrl}" style="width: 100%; height: 100%; object-fit: cover;" controls playsinline></video>
+                            `;
+                        } else {
+                            editMediaMainContent.innerHTML = `
+                                <img src="${currentMedia.previewUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Загруженное медиа">
+                            `;
+                        }
+                    } else {
+                        editMediaMainContent.innerHTML = `
+                            <div style="color: #64748b; font-size: 13px;">Загрузка...</div>
+                        `;
+                    }
+                    
+                    editMediaMainCounter.textContent = `${editCurrentMediaIndex + 1} / ${total}`;
+                    editMediaUploadArea.style.borderColor = '#334155';
+                    if (editMediaError && total > 0) {
+                        editMediaError.style.display = 'none';
+                    }
+                    
+                    if (total === 1) {
+                        editMediaArrowPrev.style.display = 'none';
+                        editMediaArrowNext.style.display = 'flex';
+                    } else {
+                        editMediaArrowPrev.style.display = editCurrentMediaIndex === 0 ? 'none' : 'flex';
+                        editMediaArrowNext.style.display = editCurrentMediaIndex === total - 1 ? 'none' : 'flex';
+                    }
+                }
+                
+                editMediaUploadArea.addEventListener('click', () => {
+                    editPostMedia.click();
+                });
+                
+                editMediaArrowPrev.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (editSelectedMedia.length < 2) return;
+                    editCurrentMediaIndex = (editCurrentMediaIndex - 1 + editSelectedMedia.length) % editSelectedMedia.length;
+                    renderEditMediaPreview();
+                });
+                
+                editMediaArrowNext.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (editSelectedMedia.length < 2) return;
+                    editCurrentMediaIndex = (editCurrentMediaIndex + 1) % editSelectedMedia.length;
+                    renderEditMediaPreview();
+                });
+                
+                editMediaRemoveBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (!editSelectedMedia.length) return;
+                    editSelectedMedia.splice(editCurrentMediaIndex, 1);
+                    updateEditFileInput();
+                    if (editCurrentMediaIndex >= editSelectedMedia.length) {
+                        editCurrentMediaIndex = editSelectedMedia.length - 1;
+                    }
+                    renderEditMediaPreview();
+                });
+                
+                editPostMedia.addEventListener('change', (e) => {
+                    const files = Array.from(e.target.files).slice(0, 3);
+                    if (files.length === 0) return;
+                    
+                    if (files.length > 3) {
+                        alert('Можно загрузить максимум 3 файла');
+                        return;
+                    }
+                    
+                    files.forEach(file => {
+                        if (editSelectedMedia.length >= 3) return;
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            editSelectedMedia.push({
+                                file: file,
+                                type: file.type || '',
+                                previewUrl: event.target.result
+                            });
+                            updateEditFileInput();
+                            renderEditMediaPreview();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                });
+                
+                // Удаление медиа при клике на X (если добавим эту функцию)
+                renderEditMediaPreview();
+                
+                // Character counter
+                document.getElementById('editPostDescription').addEventListener('input', (e) => {
+                    document.getElementById('editCharCount').textContent = e.target.value.length.toLocaleString('ru-RU');
+                });
+                
+                // Validation functions
+                function validateTitle(title) {
+                    if (!title || title.trim().length === 0) {
+                        return { valid: false, message: 'Поле не заполнено' };
+                    }
+                    if (!/^[А-ЯЁA-Z]/.test(title.trim())) {
+                        return { valid: false, message: 'Название должно начинаться с большой буквы' };
+                    }
+                    if (/^\d+$/.test(title.trim())) {
+                        return { valid: false, message: 'Название не может состоять только из цифр' };
+                    }
+                    return { valid: true };
+                }
+                
+                function validateDescription(description) {
+                    if (!description || description.trim().length === 0) {
+                        return { valid: false, message: 'Поле не заполнено' };
+                    }
+                    if (!/^[А-ЯЁA-Z]/.test(description.trim())) {
+                        return { valid: false, message: 'Описание должно начинаться с большой буквы' };
+                    }
+                    if (description.trim().length < 50) {
+                        return { valid: false, message: 'Описание должно содержать минимум 50 символов' };
+                    }
+                    return { valid: true };
+                }
+                
+                // Form submission
+                document.getElementById('editPostForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('[id$="Error"]').forEach(el => {
+                        if (el.id.startsWith('edit')) {
+                            el.style.display = 'none';
+                        }
+                    });
+                    
+                    // Validate media
+                    const mediaArray = editSelectedMedia.map(item => item.previewUrl).filter(Boolean);
+                    if (editSelectedMedia.length === 0 || mediaArray.length === 0) {
+                        editMediaError.style.display = 'block';
+                        editMediaUploadArea.style.borderColor = '#ef4444';
+                        return;
+                    } else {
+                        editMediaError.style.display = 'none';
+                        editMediaUploadArea.style.borderColor = '#334155';
+                    }
+                    
+                    // Validate title
+                    const title = document.getElementById('editPostTitle').value;
+                    const titleResult = validateTitle(title);
+                    if (!titleResult.valid) {
+                        document.getElementById('editTitleError').style.display = 'block';
+                        document.getElementById('editPostTitle').style.borderColor = '#ef4444';
+                        return;
+                    }
+                    
+                    // Validate description
+                    const description = document.getElementById('editPostDescription').value;
+                    const descResult = validateDescription(description);
+                    if (!descResult.valid) {
+                        document.getElementById('editDescriptionError').style.display = 'block';
+                        document.getElementById('editPostDescription').style.borderColor = '#ef4444';
+                        return;
+                    }
+                    
+                    // Сохраняем изменения
+                    userPost.title = title;
+                    userPost.description = description;
+                    userPost.media = mediaArray;
+                    userPost.mediaTypes = editSelectedMedia.map(item => item.type || '');
+                    
+                    saveToLocalStorage('userPost', userPost);
+                    modal.remove();
+                    
+                    // Обновляем отображение поста
+                    displayUserPost();
+                });
+                
+                // Close button
+                document.getElementById('closeEditPost').addEventListener('click', () => {
+                    modal.remove();
+                });
+                
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
             }
             
             function checkUserVerificationStatus() {
