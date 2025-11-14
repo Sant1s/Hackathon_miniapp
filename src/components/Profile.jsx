@@ -9,27 +9,25 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     firstName: '',
     lastName: '',
     phone: '',
+    password: '',
     photo: null
   });
   const [photoPreview, setPhotoPreview] = useState(null);
 
+  // Загрузка сохраненного профиля
   useEffect(() => {
-    const savedProfile = localStorage.getItem('userProfile');
+    const savedProfile = JSON.parse(localStorage.getItem('userProfile') || 'null');
     if (savedProfile) {
-      try {
-        const profile = JSON.parse(savedProfile);
-        setFormData({
-          firstName: profile.firstName || '',
-          lastName: profile.lastName || '',
-          phone: profile.phone || '',
-          photo: profile.photo || null
-        });
-        if (profile.photo) {
-          setPhotoPreview(profile.photo);
-        }
-      } catch (e) {
-        console.error('Ошибка загрузки профиля:', e);
+      if (savedProfile.photo) {
+        setPhotoPreview(savedProfile.photo);
       }
+      setFormData({
+        firstName: savedProfile.firstName || '',
+        lastName: savedProfile.lastName || '',
+        phone: savedProfile.phone || '',
+        password: savedProfile.password || '',
+        photo: savedProfile.photo || null
+      });
     }
     
     if (userProfile) {
@@ -62,13 +60,6 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     }
   };
 
-  const handlePhotoClick = () => {
-    const fileInput = document.getElementById('photoInput');
-    if (fileInput) {
-      fileInput.click();
-    }
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -80,20 +71,18 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
       if (value[0] !== '7') {
         value = '7' + value;
       }
-      if (value.length > 11) value = value.slice(0, 11);
-      
       let formatted = '+7';
       if (value.length > 1) {
-        formatted += ' (' + value.slice(1, 4);
+        formatted += ' (' + value.substring(1, 4);
       }
-      if (value.length >= 4) {
-        formatted += ') ' + value.slice(4, 7);
+      if (value.length >= 5) {
+        formatted += ') ' + value.substring(4, 7);
       }
-      if (value.length >= 7) {
-        formatted += '-' + value.slice(7, 9);
+      if (value.length >= 8) {
+        formatted += '-' + value.substring(7, 9);
       }
-      if (value.length >= 9) {
-        formatted += '-' + value.slice(9, 11);
+      if (value.length >= 10) {
+        formatted += '-' + value.substring(9, 11);
       }
       setFormData(prev => ({ ...prev, phone: formatted }));
     } else {
@@ -103,7 +92,16 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    localStorage.setItem('userProfile', JSON.stringify(formData));
+    
+    const profileData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      password: formData.password,
+      photo: photoPreview || null
+    };
+
+    localStorage.setItem('userProfile', JSON.stringify(profileData));
     alert('Профиль сохранен!');
   };
 
@@ -115,41 +113,23 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     );
   }
 
-  const themeLabel = isLightTheme ? 'Светлая тема' : 'Темная тема';
-
   return (
     <div className="content-section active" id="profile">
       <div className="header">
-        <div className="header-content">
-          <div className="icon-wrapper">
-            <svg className="user-icon" viewBox="0 0 24 24">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </div>
-          <div>
-            <h1>Профиль</h1>
-            <p className="subtitle">Заполните информацию о себе</p>
-          </div>
+        <div className="icon-wrapper">
+          <svg className="user-icon" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
         </div>
-        <div className="theme-toggle-wrapper">
-          <span className="theme-toggle-label">{themeLabel}</span>
-          <label className="theme-toggle">
-            <input 
-              type="checkbox" 
-              id="themeToggle"
-              checked={!isLightTheme}
-              onChange={(e) => onThemeToggle(!e.target.checked)}
-            />
-            <span className="theme-toggle-slider"></span>
-          </label>
-        </div>
+        <h1>Профиль</h1>
+        <p className="subtitle">Заполните информацию о себе</p>
       </div>
 
       <form id="profileForm" onSubmit={handleSubmit}>
         <div className="photo-section">
           <div className="photo-wrapper">
-            <div className="photo-preview" id="photoPreview" onClick={handlePhotoClick} style={{ cursor: 'pointer' }}>
+            <div className="photo-preview" id="photoPreview">
               {photoPreview ? (
                 <img src={photoPreview} alt="Preview" />
               ) : (
@@ -159,7 +139,7 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
                 </svg>
               )}
             </div>
-            <label htmlFor="photoInput" className="upload-button" onClick={(e) => e.stopPropagation()}>
+            <label htmlFor="photoInput" className="upload-button">
               <svg viewBox="0 0 24 24">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="17 8 12 3 7 8"></polyline>
@@ -171,14 +151,13 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
               id="photoInput" 
               accept="image/*"
               onChange={handlePhotoChange}
-              style={{ display: 'none' }}
             />
           </div>
           <p className="photo-hint">Нажмите, чтобы загрузить фото</p>
         </div>
 
         <div className="form-group">
-          <label htmlFor="firstName">Имя *</label>
+          <label htmlFor="firstName">Имя</label>
           <div className="input-wrapper">
             <svg className="input-icon" viewBox="0 0 24 24">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -191,7 +170,6 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
               placeholder="Введите ваше имя"
               value={formData.firstName}
               onChange={handleInputChange}
-              required
             />
           </div>
         </div>
@@ -215,7 +193,7 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="phone">Номер телефона *</label>
+          <label htmlFor="phone">Номер телефона</label>
           <div className="input-wrapper">
             <svg className="input-icon" viewBox="0 0 24 24">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
@@ -227,7 +205,24 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
               placeholder="+7 (___) ___-__-__"
               value={formData.phone}
               onChange={handlePhoneInput}
-              required
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Пароль</label>
+          <div className="input-wrapper">
+            <svg className="input-icon" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input 
+              type="password" 
+              id="password" 
+              name="password"
+              placeholder="Введите пароль"
+              value={formData.password}
+              onChange={handleInputChange}
             />
           </div>
         </div>

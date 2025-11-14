@@ -167,13 +167,11 @@ body.light-theme * {
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            text-align: center;
             margin-bottom: 40px;
-            position: relative;
         }
 
+        /* Для других секций, где нужен header с theme-toggle */
         .header-content {
             display: flex;
             flex-direction: column;
@@ -268,18 +266,16 @@ body.light-theme * {
         }
 
         h1 {
-            color: var(--text-primary);
+            color: #f1f5f9;
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
-            transition: color 0.3s ease;
         }
 
         .subtitle {
-            color: var(--text-tertiary);
+            color: #64748b;
             font-size: 14px;
-            transition: color 0.3s ease;
         }
 
         .photo-section {
@@ -287,7 +283,7 @@ body.light-theme * {
             flex-direction: column;
             align-items: center;
             gap: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 32px;
         }
 
         .photo-wrapper {
@@ -298,13 +294,12 @@ body.light-theme * {
             width: 96px;
             height: 96px;
             border-radius: 50%;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-color-light);
+            background: #1e293b;
+            border: 2px solid #334155;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .photo-preview img {
@@ -316,10 +311,9 @@ body.light-theme * {
         .photo-preview svg {
             width: 40px;
             height: 40px;
-            stroke: var(--text-tertiary);
+            stroke: #64748b;
             stroke-width: 2;
             fill: none;
-            transition: stroke 0.3s ease;
         }
 
         /* Переопределение цветов stroke для светлой темы */
@@ -355,29 +349,27 @@ body.light-theme * {
 
         .upload-button {
             position: absolute;
-            bottom: 30px;
+            bottom: 0;
             right: 0;
-            transform: translateX(65px);
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: var(--accent-color);
+            background: #3b82f6;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
-            z-index: 10;
         }
 
         .upload-button:hover {
-            background: var(--accent-hover);
+            background: #2563eb;
         }
 
         .upload-button svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             stroke: white;
             stroke-width: 2;
             fill: none;
@@ -389,10 +381,7 @@ body.light-theme * {
 
         .photo-hint {
             font-size: 12px;
-            color: var(--text-tertiary);
-            text-align: center;
-            margin-top: -32px;
-            transition: color 0.3s ease;
+            color: #64748b;
         }
 
         .form-group {
@@ -422,11 +411,10 @@ body.light-theme * {
             transform: translateY(-50%);
             width: 16px;
             height: 16px;
-            stroke: var(--text-tertiary);
+            stroke: #64748b;
             stroke-width: 2;
             fill: none;
             pointer-events: none;
-            transition: stroke 0.3s ease;
         }
 
         input {
@@ -434,28 +422,28 @@ body.light-theme * {
             height: 44px;
             padding-left: 40px;
             padding-right: 16px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color-light);
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #334155;
             border-radius: 12px;
-            color: var(--text-primary);
+            color: #f1f5f9;
             font-size: 14px;
             transition: all 0.2s;
         }
 
         input::placeholder {
-            color: var(--text-secondary);
+            color: #475569;
         }
 
         input:focus {
             outline: none;
-            border-color: var(--accent-color);
-            background: var(--bg-tertiary);
+            border-color: #3b82f6;
+            background: rgba(30, 41, 59, 0.8);
         }
 
         .submit-button {
             width: 100%;
             height: 44px;
-            background: var(--accent-color);
+            background: #3b82f6;
             border: none;
             border-radius: 12px;
             color: white;
@@ -467,7 +455,7 @@ body.light-theme * {
         }
 
         .submit-button:hover {
-            background: var(--accent-hover);
+            background: #2563eb;
         }
 
         .footer {
@@ -477,9 +465,8 @@ body.light-theme * {
 
         .footer-text {
             font-size: 12px;
-            color: var(--text-tertiary);
+            color: #64748b;
             line-height: 1.5;
-            transition: color 0.3s ease;
         }
 
         .empty-content {

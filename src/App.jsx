@@ -70,10 +70,11 @@ const AppContent = () => {
     }
   }, []);
 
-  // Загрузка постов при монтировании
+  // Загрузка постов при монтировании (только один раз)
   useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    loadPosts(true); // force = true для первой загрузки
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Пустой массив зависимостей - выполнится только при монтировании
 
   // Переключение темы
   const handleThemeToggle = (isLight) => {
