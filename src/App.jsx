@@ -12,7 +12,15 @@ import './App.css';
 // Вспомогательные функции для работы с localStorage
 const getFromLocalStorage = (key) => {
   const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : null;
+  if (!data) return null;
+  
+  try {
+    // Пытаемся распарсить как JSON
+    return JSON.parse(data);
+  } catch (e) {
+    // Если не JSON, возвращаем как есть (обычная строка)
+    return data;
+  }
 };
 
 const saveToLocalStorage = (key, value) => {
@@ -55,6 +63,7 @@ const AppContent = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [selectedPost, setSelectedPost] = useState(null);
   const [isLightTheme, setIsLightTheme] = useState(false);
+  const [showRatingTab, setShowRatingTab] = useState(false);
   const { posts, loadPosts } = useApp();
   const containerRef = useRef(null);
 
@@ -75,6 +84,38 @@ const AppContent = () => {
     loadPosts(true); // force = true для первой загрузки
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Пустой массив зависимостей - выполнится только при монтировании
+
+  // Проверка наличия helperName для показа вкладки Рейтинг
+  useEffect(() => {
+    // Очищаем старое значение helperName при первой загрузке, чтобы вкладка Рейтинг была скрыта
+    // Вкладка появится только после того, как пользователь введет имя в форме "Я хочу помочь"
+    localStorage.removeItem('helperName');
+    setShowRatingTab(false);
+    
+    const checkHelperName = () => {
+      const helperName = localStorage.getItem('helperName');
+      setShowRatingTab(!!helperName && helperName.trim() !== '');
+    };
+    
+    checkHelperName();
+    
+    // Слушаем изменения в localStorage
+    const handleStorageChange = () => {
+      checkHelperName();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Также слушаем кастомное событие для обновления в том же окне
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Проверяем каждые 500мс на изменения (для обновления в том же окне)
+    const interval = setInterval(checkHelperName, 500);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   // Переключение темы
   const handleThemeToggle = (isLight) => {
@@ -182,7 +223,7 @@ const AppContent = () => {
         <div className="sidebar-header">
           <h2 className="sidebar-title">Меню</h2>
         </div>
-        <Navigation activeTab={activeTab} onTabChange={handleTabChange} />
+        <Navigation activeTab={activeTab} onTabChange={handleTabChange} showRatingTab={showRatingTab} />
       </div>
       
       <div className="card">
