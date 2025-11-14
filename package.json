@@ -12,7 +12,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "generate-api": "openapi-generator-cli generate -i doc.json -g typescript-axios -o src/api --additional-properties=supportsES6=true,withInterfaces=true"
   },
   "eslintConfig": {
     "extends": [
@@ -30,5 +31,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.25.0"
   }
 }
