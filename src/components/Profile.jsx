@@ -40,14 +40,14 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     photo: null
   });
 
-  // Загрузка данных профиля из API при монтировании
+  // Загрузка данных профиля из API при монтировании и при открытии экрана
   useEffect(() => {
     // Загружаем профиль из API, если есть токен
     const token = localStorage.getItem('token');
-    if (token && !userProfile) {
+    if (token) {
       loadProfile();
     }
-  }, []); // Выполняется только при монтировании
+  }, [loadProfile]); // Загружаем профиль при монтировании и при изменении loadProfile
   
   // Восстановление данных из localStorage при монтировании компонента (при переключении вкладок)
   useEffect(() => {
@@ -114,16 +114,26 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
         lastName = userProfile.last_name;
       }
       
-      // Получаем фото из API (может быть photo_url, avatar, photo)
+      // Получаем фото из API (photo_url уже обработан в loadProfile, но проверяем и другие поля для совместимости)
       let photoUrl = userProfile.photo_url || userProfile.avatar || userProfile.photo || null;
       
-      // Если photo_url - это относительный путь, добавляем базовый URL API
+      // Если photo_url еще не обработан (для совместимости со старыми данными), обрабатываем его
       if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('data:')) {
-        // Базовый URL API из конфигурации
-        const apiBaseUrl = 'http://82.202.142.141:8080/api/v1';
-        // Убираем начальный слэш, если есть
-        const cleanPath = photoUrl.startsWith('/') ? photoUrl.substring(1) : photoUrl;
-        photoUrl = `${apiBaseUrl}/${cleanPath}`;
+        const baseUrl = 'http://82.202.142.141:8080';
+        // Для файлов просто добавляем базовый URL без /api/v1
+        if (photoUrl.startsWith('/files')) {
+          photoUrl = baseUrl + photoUrl;
+        }
+        // Если путь уже содержит /api/v1, добавляем только базовый URL
+        else if (photoUrl.startsWith('/api/v1')) {
+          photoUrl = baseUrl + photoUrl;
+        }
+        // Для остальных путей тоже просто добавляем базовый URL (без /api/v1)
+        else {
+          // Убеждаемся, что путь начинается с /
+          const cleanPath = photoUrl.startsWith('/') ? photoUrl : '/' + photoUrl;
+          photoUrl = baseUrl + cleanPath;
+        }
       }
       
       // Проверяем, есть ли сохраненные данные
@@ -212,35 +222,11 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
         // Сохраняем номер телефона для привязки данных ПЕРЕД загрузкой профиля
         setCurrentPhone(loginData.phone);
         
+        // Сбрасываем флаг восстановления данных, чтобы useEffect мог обновить данные из API
+        dataRestoredRef.current = false;
+        
         await loadProfile();
         await loadChats();
-        
-        // Восстанавливаем сохраненные данные профиля для этого номера
-        const savedProfileData = getStorageItem('userProfileData', loginData.phone);
-        if (savedProfileData) {
-          console.log('Восстановлены данные профиля при логине для телефона:', loginData.phone, savedProfileData);
-          setFormData({
-            firstName: savedProfileData.firstName || '',
-            lastName: savedProfileData.lastName || '',
-            phone: savedProfileData.phone || loginData.phone,
-            password: savedProfileData.password || '',
-            photo: savedProfileData.photo || null
-          });
-          
-          if (savedProfileData.photo) {
-            setPhotoPreview(savedProfileData.photo);
-          }
-        } else {
-          // Если сохраненных данных нет, используем данные из API
-          setFormData({
-            firstName: '',
-            lastName: '',
-            phone: loginData.phone,
-            password: '',
-            photo: null
-          });
-          setPhotoPreview(null);
-        }
         
         setShowModal(false);
       }
@@ -315,13 +301,12 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
           updateToken(loginResponse.data.token);
           refreshApiClient();
           
+          // Сбрасываем флаг восстановления данных, чтобы useEffect мог обновить данные из API
+          dataRestoredRef.current = false;
+          
           await loadProfile();
           await loadChats();
           
-          setFormData(profileData);
-          if (photoToSave) {
-            setPhotoPreview(photoToSave);
-          }
           setShowModal(false);
         }
       }

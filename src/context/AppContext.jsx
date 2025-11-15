@@ -211,9 +211,41 @@ export const AppProvider = ({ children }) => {
     
     try {
       const response = await apiClient.usersMeGet();
-      setUserProfile(response.data);
-      if (response.data && response.data.name) {
-        setHelperName(response.data.name);
+      let profileData = response.data;
+      
+      // Обрабатываем photo_url для правильного отображения фото
+      if (profileData && profileData.photo_url) {
+        let photoUrl = profileData.photo_url;
+        const baseUrl = 'http://82.202.142.141:8080';
+        
+        // Если photo_url - это относительный путь, добавляем базовый URL
+        if (!photoUrl.startsWith('http') && !photoUrl.startsWith('data:')) {
+          // Для файлов просто добавляем базовый URL без /api/v1
+          if (photoUrl.startsWith('/files')) {
+            photoUrl = baseUrl + photoUrl;
+          }
+          // Если путь уже содержит /api/v1, добавляем только базовый URL
+          else if (photoUrl.startsWith('/api/v1')) {
+            photoUrl = baseUrl + photoUrl;
+          }
+          // Для остальных путей тоже просто добавляем базовый URL (без /api/v1)
+          else {
+            // Убеждаемся, что путь начинается с /
+            const cleanPath = photoUrl.startsWith('/') ? photoUrl : '/' + photoUrl;
+            photoUrl = baseUrl + cleanPath;
+          }
+        }
+        
+        // Обновляем photo_url в данных профиля
+        profileData = {
+          ...profileData,
+          photo_url: photoUrl
+        };
+      }
+      
+      setUserProfile(profileData);
+      if (profileData && profileData.name) {
+        setHelperName(profileData.name);
       }
     } catch (err) {
       // Если ошибка 401, значит токен невалидный или истек - очищаем его
