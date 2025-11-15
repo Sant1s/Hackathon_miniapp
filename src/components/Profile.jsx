@@ -56,6 +56,15 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
       const savedProfileData = getStorageItem('userProfileData', phone);
       if (savedProfileData) {
         console.log('Восстановлены данные профиля из localStorage для телефона:', phone, savedProfileData);
+        
+        // Обрабатываем фото URL, если это относительный путь
+        let photoUrl = savedProfileData.photo || null;
+        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('data:')) {
+          const apiBaseUrl = 'http://82.202.142.141:8080/api/v1';
+          const cleanPath = photoUrl.startsWith('/') ? photoUrl.substring(1) : photoUrl;
+          photoUrl = `${apiBaseUrl}/${cleanPath}`;
+        }
+        
         // Восстанавливаем все сохраненные данные, включая аватарку и пароль
         setFormData({
           firstName: savedProfileData.firstName || '',
@@ -65,8 +74,8 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
           photo: savedProfileData.photo || null
         });
         
-        if (savedProfileData.photo) {
-          setPhotoPreview(savedProfileData.photo);
+        if (photoUrl) {
+          setPhotoPreview(photoUrl);
         }
         
         dataRestoredRef.current = true;
@@ -106,7 +115,16 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
       }
       
       // Получаем фото из API (может быть photo_url, avatar, photo)
-      const photoUrl = userProfile.photo_url || userProfile.avatar || userProfile.photo || null;
+      let photoUrl = userProfile.photo_url || userProfile.avatar || userProfile.photo || null;
+      
+      // Если photo_url - это относительный путь, добавляем базовый URL API
+      if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('data:')) {
+        // Базовый URL API из конфигурации
+        const apiBaseUrl = 'http://82.202.142.141:8080/api/v1';
+        // Убираем начальный слэш, если есть
+        const cleanPath = photoUrl.startsWith('/') ? photoUrl.substring(1) : photoUrl;
+        photoUrl = `${apiBaseUrl}/${cleanPath}`;
+      }
       
       // Проверяем, есть ли сохраненные данные
       const savedProfileData = getStorageItem('userProfileData', phone);
@@ -122,7 +140,9 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
       
       // Устанавливаем превью фото из API, если нет сохраненного
       if (photoUrl && !savedProfileData?.photo) {
+        // Загружаем фото по ссылке
         setPhotoPreview(photoUrl);
+        console.log('Загружено фото из API:', photoUrl);
       } else if (savedProfileData?.photo) {
         // Используем сохраненное фото, если оно есть
         setPhotoPreview(savedProfileData.photo);
@@ -137,10 +157,10 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
           lastName: lastName,
           phone: userProfile.phone || phone,
           password: savedProfileData?.password || '', // Сохраняем существующий пароль
-          photo: savedProfileData?.photo || photoUrl // Сохраняем существующее фото или из API
+          photo: savedProfileData?.photo || photoUrl || null // Сохраняем существующее фото или из API
         };
         setStorageItem('userProfileData', profileDataToSave, phone);
-        console.log('Сохранены данные профиля из API для телефона:', phone);
+        console.log('Сохранены данные профиля из API для телефона:', phone, 'photo_url:', photoUrl);
       }
       
       dataRestoredRef.current = true;

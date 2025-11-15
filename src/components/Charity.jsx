@@ -828,6 +828,7 @@ const Charity = ({ onOpenPost }) => {
 
   const handleHelperPostSubmit = async (e) => {
     e.preventDefault();
+    console.log('handleHelperPostSubmit вызвана', helperPostData);
     setHelperPostLoading(true);
     setHelperPostError(null);
 
@@ -848,17 +849,31 @@ const Charity = ({ onOpenPost }) => {
       if (!helperPostData.amount || parseFloat(helperPostData.amount) <= 0) {
         throw new Error('Сумма сбора обязательна и должна быть больше 0');
       }
+      
+      // Проверяем, что amount - это валидное число
+      const amountValue = parseFloat(helperPostData.amount);
+      if (isNaN(amountValue) || amountValue <= 0) {
+        throw new Error('Сумма сбора должна быть положительным числом');
+      }
 
       // Показываем модальное окно обработки
       setMode('processing');
       
       const phone = getPhone();
       // Формируем recipient из имени и фамилии
-      const recipient = `${helperPostData.firstName} ${helperPostData.lastName}`;
+      const recipient = `${helperPostData.firstName} ${helperPostData.lastName}`.trim();
+      if (!recipient) {
+        throw new Error('Получатель средств обязателен');
+      }
+      
       // Используем телефон из профиля или сохраненный телефон
       const userPhone = phone || '';
-      // Банк оставляем пустым или можно добавить поле в форму
-      const bank = '';
+      if (!userPhone) {
+        throw new Error('Телефон обязателен для создания поста');
+      }
+      
+      // Банк - обязательное поле, используем значение по умолчанию, если не указан
+      const bank = 'Не указан'; // Используем значение по умолчанию вместо пустой строки
       
       // Берем первый медиа файл (API принимает один файл, но можно расширить)
       const mediaFile = helperPostData.media && helperPostData.media.length > 0 
@@ -868,9 +883,21 @@ const Charity = ({ onOpenPost }) => {
       // Проверяем, редактируем ли мы существующий пост
       const isEditing = createdPost !== null && createdPost.id;
       
+      console.log('Отправка поста на бэкенд:', {
+        isEditing,
+        title: helperPostData.title,
+        description: helperPostData.description,
+        amount: parseFloat(helperPostData.amount),
+        recipient,
+        bank,
+        phone: userPhone,
+        hasMedia: !!mediaFile
+      });
+      
       let response;
       if (isEditing) {
         // Обновляем существующий пост
+        console.log('Обновление поста с ID:', createdPost.id);
         response = await apiClient.postsIdPatch(
           createdPost.id,
           {
@@ -884,18 +911,37 @@ const Charity = ({ onOpenPost }) => {
         );
       } else {
         // Создаем новый пост
+        console.log('Создание нового поста');
+        // Убеждаемся, что все строки не пустые и правильно отформатированы
+        const title = helperPostData.title.trim();
+        const description = helperPostData.description.trim();
+        const amount = parseFloat(helperPostData.amount);
+        
+        console.log('Параметры для создания поста:', {
+          title,
+          description,
+          amount,
+          recipient,
+          bank,
+          phone: userPhone,
+          hasMedia: !!mediaFile
+        });
+        
         response = await apiClient.postsPost(
-          helperPostData.title,
-          helperPostData.description,
-          parseFloat(helperPostData.amount),
+          title,
+          description,
+          amount,
           recipient,
           bank,
           userPhone,
           mediaFile
         );
       }
+      
+      console.log('Ответ от API:', response);
 
-      if (response.data) {
+      if (response && response.data) {
+        console.log('Пост успешно создан/обновлен:', response.data);
         const postData = {
           id: isEditing ? createdPost.id : (response.data.id || Date.now()),
           ...helperPostData,
@@ -917,12 +963,21 @@ const Charity = ({ onOpenPost }) => {
         await loadPosts(true);
         
         setMode('viewPost');
+      } else {
+        console.warn('Ответ от API не содержит данных:', response);
+        throw new Error('Не удалось создать пост. Ответ от сервера пуст.');
       }
       
     } catch (err) {
       console.error('Ошибка создания поста:', err);
+      console.error('Детали ошибки:', {
+        message: err.message,
+        response: err.response,
+        data: err.response?.data
+      });
       setHelperPostError(
         err.response?.data?.error?.message || 
+        err.response?.data?.message ||
         err.message || 
         'Ошибка при создании поста. Проверьте введенные данные.'
       );
@@ -1468,7 +1523,10 @@ const Charity = ({ onOpenPost }) => {
           <div className="intro-form">
             <h2>{createdPost ? 'Редактировать пост' : 'Создать пост'}</h2>
             <p>{createdPost ? 'Измените информацию о вашем посте' : 'Заполните информацию о вашем посте'}</p>
-            <form onSubmit={handleHelperPostSubmit}>
+            <form onSubmit={(e) => {
+              console.log('Форма отправлена, вызываем handleHelperPostSubmit');
+              handleHelperPostSubmit(e);
+            }}>
               {/* Аватар */}
               <div className="form-group">
                 <label>Аватар</label>

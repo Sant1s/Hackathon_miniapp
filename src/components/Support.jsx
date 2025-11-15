@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { getStorageItem, setStorageItem, removeStorageItem, getSavedPhone } from '../utils/storage';
 
@@ -11,7 +11,7 @@ const Support = () => {
   };
   
   // Определяем доступные категории в зависимости от действий в Благотворительности
-  const getAvailableCategories = () => {
+  const getAvailableCategories = useCallback(() => {
     const phone = getPhone();
     const charityMode = getStorageItem('charityMode', phone);
     const helperName = getStorageItem('helperName', phone);
@@ -35,7 +35,7 @@ const Support = () => {
     }
     
     return categories;
-  };
+  }, []); // Функция стабильна, так как использует только утилиты
   
   const [availableCategories, setAvailableCategories] = useState(getAvailableCategories());
   
@@ -72,7 +72,7 @@ const Support = () => {
       window.removeEventListener('currentPhoneChanged', handleStorageChange);
       clearInterval(interval);
     };
-  }, []);
+  }, [getAvailableCategories]);
   
   // Восстанавливаем состояние из localStorage при инициализации
   const getInitialState = () => {
