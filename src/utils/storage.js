@@ -102,7 +102,9 @@ export const clearUserDataForPhone = (phone) => {
     'supportSelectedCategory',
     'supportShowChatItem',
     'supportHasReceivedStandardResponse',
-    'userProfile'
+    'userProfile',
+    'userProfileData',
+    'helperPostCreated'
   ];
   
   keys.forEach(key => {

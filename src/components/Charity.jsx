@@ -700,7 +700,6 @@ const Charity = ({ onOpenPost }) => {
       setShowReceiptProcessing(false);
       setReceiptFile(null);
       setReceiptFileName('');
-      alert('Чек успешно отправлен!');
     }, 3000);
   };
 
@@ -853,32 +852,82 @@ const Charity = ({ onOpenPost }) => {
       // Показываем модальное окно обработки
       setMode('processing');
       
-      // Имитируем создание или обновление поста (в реальности здесь будет вызов API)
-      setTimeout(() => {
-        // Если пост уже существует (редактирование), обновляем его, иначе создаем новый
-        const isEditing = createdPost !== null;
-               const phone = getPhone();
-               const postData = {
-                 id: isEditing ? createdPost.id : Date.now(), // Сохраняем существующий ID при редактировании
-                 ...helperPostData,
-                 createdAt: isEditing ? createdPost.createdAt : new Date().toISOString(), // Сохраняем исходную дату создания
-                 status: 'active',
-                 images: helperPostMediaPreview, // Сохраняем превью фотографий
-                 avatar: helperPostAvatarPreview // Сохраняем превью аватара
-               };
-               setCreatedPost(postData);
-               setStorageItem('helperPostCreated', 'true', phone);
-               setStorageItem('createdPostData', postData, phone);
-               // Также сохраняем превью отдельно для восстановления
-               setStorageItem('helperPostMediaPreview', helperPostMediaPreview, phone);
-               if (helperPostAvatarPreview) {
-                 setStorageItem('helperPostAvatarPreview', helperPostAvatarPreview, phone);
-               }
-               setMode('viewPost');
-      }, 2000); // 2 секунды для демонстрации
+      const phone = getPhone();
+      // Формируем recipient из имени и фамилии
+      const recipient = `${helperPostData.firstName} ${helperPostData.lastName}`;
+      // Используем телефон из профиля или сохраненный телефон
+      const userPhone = phone || '';
+      // Банк оставляем пустым или можно добавить поле в форму
+      const bank = '';
+      
+      // Берем первый медиа файл (API принимает один файл, но можно расширить)
+      const mediaFile = helperPostData.media && helperPostData.media.length > 0 
+        ? helperPostData.media[0] 
+        : undefined;
+      
+      // Проверяем, редактируем ли мы существующий пост
+      const isEditing = createdPost !== null && createdPost.id;
+      
+      let response;
+      if (isEditing) {
+        // Обновляем существующий пост
+        response = await apiClient.postsIdPatch(
+          createdPost.id,
+          {
+            title: helperPostData.title,
+            description: helperPostData.description,
+            amount: parseFloat(helperPostData.amount),
+            recipient: recipient,
+            bank: bank,
+            phone: userPhone
+          }
+        );
+      } else {
+        // Создаем новый пост
+        response = await apiClient.postsPost(
+          helperPostData.title,
+          helperPostData.description,
+          parseFloat(helperPostData.amount),
+          recipient,
+          bank,
+          userPhone,
+          mediaFile
+        );
+      }
+
+      if (response.data) {
+        const postData = {
+          id: isEditing ? createdPost.id : (response.data.id || Date.now()),
+          ...helperPostData,
+          createdAt: isEditing ? createdPost.createdAt : new Date().toISOString(),
+          status: 'active',
+          images: helperPostMediaPreview,
+          avatar: helperPostAvatarPreview
+        };
+        setCreatedPost(postData);
+        setStorageItem('helperPostCreated', 'true', phone);
+        setStorageItem('createdPostData', postData, phone);
+        // Также сохраняем превью отдельно для восстановления
+        setStorageItem('helperPostMediaPreview', helperPostMediaPreview, phone);
+        if (helperPostAvatarPreview) {
+          setStorageItem('helperPostAvatarPreview', helperPostAvatarPreview, phone);
+        }
+        
+        // Обновляем список постов
+        await loadPosts(true);
+        
+        setMode('viewPost');
+      }
       
     } catch (err) {
-      setHelperPostError(err.message || 'Ошибка при создании поста');
+      console.error('Ошибка создания поста:', err);
+      setHelperPostError(
+        err.response?.data?.error?.message || 
+        err.message || 
+        'Ошибка при создании поста. Проверьте введенные данные.'
+      );
+      // Возвращаемся к форме создания поста при ошибке
+      setMode('createPost');
     } finally {
       setHelperPostLoading(false);
     }

@@ -40,14 +40,23 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     photo: null
   });
 
-  // Восстановление данных профиля при монтировании компонента (приоритет над API)
+  // Загрузка данных профиля из API при монтировании
+  useEffect(() => {
+    // Загружаем профиль из API, если есть токен
+    const token = localStorage.getItem('token');
+    if (token && !userProfile) {
+      loadProfile();
+    }
+  }, []); // Выполняется только при монтировании
+  
+  // Восстановление данных из localStorage при монтировании компонента (при переключении вкладок)
   useEffect(() => {
     const phone = getSavedPhone();
     if (phone && !dataRestoredRef.current) {
       const savedProfileData = getStorageItem('userProfileData', phone);
       if (savedProfileData) {
-        console.log('Восстановлены данные профиля при монтировании для телефона:', phone, savedProfileData);
-        // Восстанавливаем все сохраненные данные
+        console.log('Восстановлены данные профиля из localStorage для телефона:', phone, savedProfileData);
+        // Восстанавливаем все сохраненные данные, включая аватарку и пароль
         setFormData({
           firstName: savedProfileData.firstName || '',
           lastName: savedProfileData.lastName || '',
@@ -63,48 +72,80 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
         dataRestoredRef.current = true;
       }
     }
-  }, []); // Выполняется только при монтировании
+  }, []); // Выполняется при каждом монтировании компонента
   
-  // Загрузка данных профиля из API (только если нет сохраненных данных)
+  // Заполнение формы данными из API (только если нет сохраненных данных)
   useEffect(() => {
-    // Если данные уже восстановлены из localStorage, не перезаписываем их данными из API
+    // Если данные уже восстановлены из localStorage, не перезаписываем их
     if (dataRestoredRef.current) {
       return;
     }
     
-    const phone = getSavedPhone() || (userProfile?.phone);
-    
-    // Если сохраненных данных нет, используем данные из API
-    if (userProfile && userProfile.phone) {
-      setCurrentPhone(userProfile.phone);
+    if (userProfile) {
+      const phone = userProfile.phone || getSavedPhone();
       
-      // Сохраняем данные профиля с привязкой к номеру телефона (только если нет сохраненных данных)
-      const existingData = getStorageItem('userProfileData', userProfile.phone);
-      if (!existingData) {
-        const profileDataToSave = {
-          firstName: userProfile.name?.split(' ')[0] || '',
-          lastName: userProfile.name?.split(' ').slice(1).join(' ') || '',
-          phone: userProfile.phone,
-          photo: userProfile.photo || userProfile.avatar || null
-        };
-        setStorageItem('userProfileData', profileDataToSave, userProfile.phone);
-        
-        setFormData({
-          firstName: profileDataToSave.firstName || '',
-          lastName: profileDataToSave.lastName || '',
-          phone: profileDataToSave.phone,
-          password: '',
-          photo: profileDataToSave.photo || null
-        });
-        
-        if (profileDataToSave.photo) {
-          setPhotoPreview(profileDataToSave.photo);
-        }
-        
-        console.log('Сохранены данные профиля из API для телефона:', userProfile.phone);
+      // Устанавливаем номер телефона, если его еще нет
+      if (userProfile.phone) {
+        setCurrentPhone(userProfile.phone);
       }
+      
+      // Извлекаем имя и фамилию из API
+      let firstName = '';
+      let lastName = '';
+      
+      if (userProfile.first_name) {
+        firstName = userProfile.first_name;
+      } else if (userProfile.name) {
+        const nameParts = userProfile.name.split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
+      }
+      
+      if (userProfile.last_name) {
+        lastName = userProfile.last_name;
+      }
+      
+      // Получаем фото из API (может быть photo_url, avatar, photo)
+      const photoUrl = userProfile.photo_url || userProfile.avatar || userProfile.photo || null;
+      
+      // Проверяем, есть ли сохраненные данные
+      const savedProfileData = getStorageItem('userProfileData', phone);
+      
+      // Обновляем форму данными из API, но сохраняем пароль из localStorage, если он есть
+      setFormData({
+        firstName: firstName,
+        lastName: lastName,
+        phone: userProfile.phone || phone || '',
+        password: savedProfileData?.password || '', // Сохраняем пароль из localStorage
+        photo: null // File объект не сохраняем, только URL
+      });
+      
+      // Устанавливаем превью фото из API, если нет сохраненного
+      if (photoUrl && !savedProfileData?.photo) {
+        setPhotoPreview(photoUrl);
+      } else if (savedProfileData?.photo) {
+        // Используем сохраненное фото, если оно есть
+        setPhotoPreview(savedProfileData.photo);
+      } else {
+        setPhotoPreview(null);
+      }
+      
+      // Сохраняем данные в localStorage, но не перезаписываем пароль и фото, если они уже есть
+      if (phone) {
+        const profileDataToSave = {
+          firstName: firstName,
+          lastName: lastName,
+          phone: userProfile.phone || phone,
+          password: savedProfileData?.password || '', // Сохраняем существующий пароль
+          photo: savedProfileData?.photo || photoUrl // Сохраняем существующее фото или из API
+        };
+        setStorageItem('userProfileData', profileDataToSave, phone);
+        console.log('Сохранены данные профиля из API для телефона:', phone);
+      }
+      
+      dataRestoredRef.current = true;
     }
-  }, [userProfile]);
+  }, [userProfile, loadProfile]);
 
   // Функция для очистки всех данных пользователя из localStorage (теперь не используется, данные сохраняются по номеру)
   // const clearUserData = () => { ... } - удалена, так как данные теперь привязаны к номеру телефона
@@ -116,8 +157,8 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
       setShowModal(false);
     }
     
-    // Сбрасываем флаг восстановления данных при монтировании, чтобы данные восстановились заново
-    dataRestoredRef.current = false;
+    // НЕ сбрасываем флаг восстановления данных, чтобы при переключении вкладок данные сохранялись
+    // dataRestoredRef.current будет сброшен только при логине/регистрации
   }, []); // Выполняется только при монтировании
 
   const handleLogin = async (e) => {
@@ -126,6 +167,19 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     setAuthError(null);
 
     try {
+      // Нормализуем номер телефона для сравнения
+      const normalizedNewPhone = loginData.phone.replace(/\D/g, '');
+      const previousPhone = getSavedPhone();
+      const normalizedPreviousPhone = previousPhone ? previousPhone.replace(/\D/g, '') : null;
+      
+      // Если номер телефона изменился, очищаем данные предыдущего пользователя
+      if (normalizedPreviousPhone && normalizedPreviousPhone !== normalizedNewPhone) {
+        console.log('Обнаружен новый пользователь, очищаем данные предыдущего:', normalizedPreviousPhone);
+        clearUserDataForPhone(previousPhone);
+        localStorage.removeItem('currentPhone');
+        localStorage.removeItem('userProfile');
+      }
+      
       const response = await apiClient.authLoginPost({
         phone: loginData.phone,
         password: loginData.password,
@@ -188,6 +242,19 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     setAuthError(null);
 
     try {
+      // Нормализуем номер телефона для сравнения
+      const normalizedNewPhone = registerData.phone.replace(/\D/g, '');
+      const previousPhone = getSavedPhone();
+      const normalizedPreviousPhone = previousPhone ? previousPhone.replace(/\D/g, '') : null;
+      
+      // Если номер телефона изменился, очищаем данные предыдущего пользователя
+      if (normalizedPreviousPhone && normalizedPreviousPhone !== normalizedNewPhone) {
+        console.log('Обнаружен новый пользователь при регистрации, очищаем данные предыдущего:', normalizedPreviousPhone);
+        clearUserDataForPhone(previousPhone);
+        localStorage.removeItem('currentPhone');
+        localStorage.removeItem('userProfile');
+      }
+      
       const response = await apiClient.authRegisterPost({
         first_name: registerData.firstName,
         last_name: registerData.lastName || '',
@@ -333,7 +400,8 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
       reader.onload = (event) => {
         const photoData = event.target.result;
         setPhotoPreview(photoData);
-        const updatedFormData = { ...formData, photo: photoData };
+        // Сохраняем и File объект, и base64 строку
+        const updatedFormData = { ...formData, photo: file, photoBase64: photoData };
         setFormData(updatedFormData);
         
         // Сохраняем с привязкой к номеру телефона
@@ -341,14 +409,14 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
         if (phone) {
           const profileDataToSave = {
             ...updatedFormData,
-            photo: photoData
+            photo: photoData // Для localStorage сохраняем base64
           };
           setStorageItem('userProfileData', profileDataToSave, phone);
           console.log('Сохранена аватарка для телефона:', phone);
         }
         
         // Также сохраняем в обычный userProfile для обратной совместимости
-        localStorage.setItem('userProfile', JSON.stringify(updatedFormData));
+        localStorage.setItem('userProfile', JSON.stringify({ ...updatedFormData, photo: photoData }));
       };
       reader.readAsDataURL(file);
     }
@@ -379,36 +447,110 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const phone = getSavedPhone() || formData.phone;
-    const profileData = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      phone: formData.phone,
-      password: formData.password,
-      photo: photoPreview || null
-    };
+    try {
+      // Обновляем профиль на бэкенде
+      const updateRequest = {
+        first_name: formData.firstName,
+        last_name: formData.lastName
+      };
+      
+      const response = await apiClient.usersMePatch(updateRequest);
+      
+      // Если есть фото, загружаем его отдельно
+      if (photoPreview) {
+        let photoFile = null;
+        
+        // Если formData.photo - это File, используем его
+        if (formData.photo instanceof File) {
+          photoFile = formData.photo;
+        } 
+        // Если photoPreview - это base64 строка, преобразуем в File
+        else if (typeof photoPreview === 'string' && photoPreview.startsWith('data:')) {
+          try {
+            // Преобразуем base64 в blob, затем в File
+            const base64Response = await fetch(photoPreview);
+            const blob = await base64Response.blob();
+            photoFile = new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' });
+          } catch (err) {
+            console.error('Ошибка преобразования фото:', err);
+          }
+        }
+        
+        if (photoFile instanceof File) {
+          await apiClient.usersMePhotoPost(photoFile);
+        }
+      }
+      
+      // Обновляем профиль из ответа API
+      if (response.data) {
+        await loadProfile();
+      }
+      
+      const phone = getSavedPhone() || formData.phone;
+      const profileData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        password: formData.password, // Сохраняем пароль
+        photo: photoPreview || null // Сохраняем фото (может быть base64 или URL)
+      };
 
-    // Сохраняем с привязкой к номеру телефона
-    if (phone) {
-      setStorageItem('userProfileData', profileData, phone);
-      console.log('Сохранен профиль для телефона:', phone, profileData);
+      // Сохраняем с привязкой к номеру телефона
+      if (phone) {
+        setStorageItem('userProfileData', profileData, phone);
+        console.log('Сохранен профиль для телефона:', phone, profileData);
+      }
+      
+      // Также сохраняем в обычный userProfile для обратной совместимости
+      localStorage.setItem('userProfile', JSON.stringify(profileData));
+      
+      // Обновляем флаг, чтобы данные не перезаписывались при следующем рендере
+      dataRestoredRef.current = true;
+      
+      // Убираем alert, так как данные уже сохранены на бэкенде
+      // alert('Профиль сохранен!');
+    } catch (err) {
+      console.error('Ошибка сохранения профиля:', err);
+      alert(
+        err.response?.data?.error?.message || 
+        err.message || 
+        'Ошибка при сохранении профиля. Попробуйте еще раз.'
+      );
     }
-    
-    // Также сохраняем в обычный userProfile для обратной совместимости
-    localStorage.setItem('userProfile', JSON.stringify(profileData));
-    alert('Профиль сохранен!');
   };
 
   const handleLogout = () => {
+    // Получаем текущий номер телефона перед очисткой
+    const currentPhone = getSavedPhone();
+    
+    // Очищаем все данные пользователя для этого номера телефона
+    if (currentPhone) {
+      clearUserDataForPhone(currentPhone);
+    }
+    
+    // Очищаем текущий номер телефона
+    localStorage.removeItem('currentPhone');
+    
     // Удаляем токен из localStorage и обновляем конфигурацию API
+    localStorage.removeItem('token');
     updateTokenConfig(null);
     refreshApiClient();
     
-    // Очищаем данные профиля (опционально, можно оставить для следующего входа)
-    // localStorage.removeItem('userProfile');
+    // Очищаем общие данные профиля (для обратной совместимости)
+    localStorage.removeItem('userProfile');
+    
+    // Очищаем состояние формы профиля
+    setFormData({
+      firstName: '',
+      lastName: '',
+      phone: '',
+      password: '',
+      photo: null
+    });
+    setPhotoPreview(null);
     
     // Показываем модальное окно входа
     setShowModal(true);
@@ -417,6 +559,9 @@ const Profile = ({ isLightTheme, onThemeToggle }) => {
     // Очищаем форму входа
     setLoginData({ phone: '', password: '' });
     setAuthError(null);
+    
+    // Триггерим событие для обновления других компонентов
+    window.dispatchEvent(new Event('currentPhoneChanged'));
   };
 
   // Если показываем модальное окно
