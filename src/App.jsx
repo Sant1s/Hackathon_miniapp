@@ -63,7 +63,16 @@ const AppContent = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [selectedPost, setSelectedPost] = useState(null);
   const [isLightTheme, setIsLightTheme] = useState(false);
-  const [showRatingTab, setShowRatingTab] = useState(false);
+  // Проверяем наличие helperName при инициализации для показа вкладки Рейтинг
+  const getInitialShowRatingTab = () => {
+    const { getStorageItem, getSavedPhone } = require('./utils/storage');
+    const phone = getSavedPhone();
+    const helperName = getStorageItem('helperName', phone);
+    const shouldShow = !!(helperName && helperName.trim() !== '');
+    console.log('Инициализация showRatingTab:', { helperName, shouldShow, phone });
+    return shouldShow;
+  };
+  const [showRatingTab, setShowRatingTab] = useState(getInitialShowRatingTab);
   const { posts, loadPosts } = useApp();
   const containerRef = useRef(null);
 
@@ -87,16 +96,16 @@ const AppContent = () => {
 
   // Проверка наличия helperName для показа вкладки Рейтинг
   useEffect(() => {
-    // Очищаем старое значение helperName при первой загрузке, чтобы вкладка Рейтинг была скрыта
-    // Вкладка появится только после того, как пользователь введет имя в форме "Я хочу помочь"
-    localStorage.removeItem('helperName');
-    setShowRatingTab(false);
-    
+    const { getStorageItem, getSavedPhone } = require('./utils/storage');
     const checkHelperName = () => {
-      const helperName = localStorage.getItem('helperName');
-      setShowRatingTab(!!helperName && helperName.trim() !== '');
+      const phone = getSavedPhone();
+      const helperName = getStorageItem('helperName', phone);
+      const shouldShow = !!(helperName && helperName.trim() !== '');
+      console.log('Проверка helperName для вкладки Рейтинг:', { helperName, shouldShow, phone });
+      setShowRatingTab(shouldShow);
     };
     
+    // Проверяем при монтировании
     checkHelperName();
     
     // Слушаем изменения в localStorage

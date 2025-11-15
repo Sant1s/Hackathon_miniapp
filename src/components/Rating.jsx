@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
+// Функция для определения статуса на основе баллов
+const getStatusInfo = (points) => {
+  if (points >= 5501) return { name: 'Пламенное Сердце', range: 'от 5 501 балла' };
+  if (points >= 2501) return { name: 'Благотворитель', range: '2 501 — 5 500 баллов' };
+  if (points >= 501) return { name: 'Хранитель Надежды', range: '501 — 2 500 баллов' };
+  return { name: 'Друг Платформы', range: '5 — 500 баллов' };
+};
+
 const Rating = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [userRating, setUserRating] = useState({
@@ -13,19 +21,17 @@ const Rating = () => {
   useEffect(() => {
     // Загрузка данных рейтинга (пока заглушка)
     const mockLeaderboard = [
-      { id: 1, name: 'Иван Иванов', status: 'Пламенное Сердце', points: 12500, rank: 1 },
-      { id: 2, name: 'Мария Петрова', status: 'Благотворитель', points: 8500, rank: 2 },
-      { id: 3, name: 'Алексей Сидоров', status: 'Хранитель Надежды', points: 3200, rank: 3 },
+      { id: 1, name: 'Иван Иванов', points: 12500, rank: 1 },
+      { id: 2, name: 'Мария Петрова', points: 8500, rank: 2 },
+      { id: 3, name: 'Алексей Сидоров', points: 3200, rank: 3 },
     ];
-    setLeaderboard(mockLeaderboard);
+    // Вычисляем статусы на основе баллов
+    const leaderboardWithStatuses = mockLeaderboard.map(user => ({
+      ...user,
+      status: getStatusInfo(user.points).name
+    }));
+    setLeaderboard(leaderboardWithStatuses);
   }, []);
-
-  const getStatusInfo = (points) => {
-    if (points >= 5501) return { name: 'Пламенное Сердце', range: 'от 5 501 балла' };
-    if (points >= 2501) return { name: 'Благотворитель', range: '2 501 — 5 500 баллов' };
-    if (points >= 501) return { name: 'Хранитель Надежды', range: '501 — 2 500 баллов' };
-    return { name: 'Друг Платформы', range: '5 — 500 баллов' };
-  };
 
   const getRankBadgeClass = (rank) => {
     if (rank === 1) return 'rank-1';
@@ -123,22 +129,26 @@ const Rating = () => {
         <div className="leaderboard">
           <h2 className="leaderboard-title">Топ благотворителей</h2>
           <div id="leaderboardList">
-            {leaderboard.map((user) => (
-              <div key={user.id} className="leaderboard-item">
-                <div className="leaderboard-position">{user.rank}</div>
-                <div className="leaderboard-avatar">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+            {leaderboard.map((user) => {
+              // Вычисляем статус на основе баллов для каждого пользователя
+              const userStatus = getStatusInfo(user.points);
+              return (
+                <div key={user.id} className="leaderboard-item">
+                  <div className="leaderboard-position">{user.rank}</div>
+                  <div className="leaderboard-avatar">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div className="leaderboard-info">
+                    <div className="leaderboard-name">{user.name}</div>
+                    <div className="leaderboard-status">{userStatus.name}</div>
+                  </div>
+                  <div className="leaderboard-points">{user.points.toLocaleString('ru-RU')}</div>
                 </div>
-                <div className="leaderboard-info">
-                  <div className="leaderboard-name">{user.name}</div>
-                  <div className="leaderboard-status">{user.status}</div>
-                </div>
-                <div className="leaderboard-points">{user.points.toLocaleString('ru-RU')}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

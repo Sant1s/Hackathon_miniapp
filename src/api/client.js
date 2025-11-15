@@ -7,7 +7,12 @@ let apiClient = new DefaultApi(apiConfig);
 // Функция для пересоздания клиента с обновленным токеном
 export const refreshApiClient = () => {
   // Обновляем токен в конфигурации
-  apiConfig.accessToken = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
+  if (token) {
+    apiConfig.accessToken = token;
+  } else {
+    apiConfig.accessToken = undefined;
+  }
   // Пересоздаем клиент
   apiClient = new DefaultApi(apiConfig);
   return apiClient;

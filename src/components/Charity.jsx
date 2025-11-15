@@ -1,12 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { apiClient } from '../api/client';
+import { getStorageItem, setStorageItem, removeStorageItem, getSavedPhone } from '../utils/storage';
 
 const Charity = ({ onOpenPost }) => {
   const { posts, loading, loadPosts } = useApp();
-  const [mode, setMode] = useState('initial'); // 'initial', 'passport', 'verifying', 'createPost', 'processing', 'viewPost', 'posts', 'userPost', 'needHelp'
+  // Получаем номер телефона для привязки данных
+  const getPhone = () => {
+    return getSavedPhone() || null;
+  };
+  
+  // Инициализируем mode из localStorage, если есть сохраненное значение
+  const getInitialMode = () => {
+    const phone = getPhone();
+    if (!phone) {
+      // Если номера еще нет, возвращаем 'initial', но потом восстановим из localStorage
+      return 'initial';
+    }
+    const savedMode = getStorageItem('charityMode', phone);
+    return savedMode || 'initial';
+  };
+  const [mode, setMode] = useState(getInitialMode); // 'initial', 'passport', 'verifying', 'createPost', 'processing', 'viewPost', 'posts', 'userPost', 'needHelp'
   const [createdPost, setCreatedPost] = useState(null); // Данные созданного поста
-  const [helperName, setHelperName] = useState('');
+  // Восстанавливаем helperName из localStorage при инициализации
+  const getInitialHelperName = () => {
+    const phone = getPhone();
+    const savedHelperName = getStorageItem('helperName', phone);
+    return savedHelperName || '';
+  };
+  const [helperName, setHelperName] = useState(getInitialHelperName);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showReceiptProcessing, setShowReceiptProcessing] = useState(false);
   const [receiptFile, setReceiptFile] = useState(null);
@@ -22,6 +44,9 @@ const Charity = ({ onOpenPost }) => {
     middleName: '',
     passportSeries: '',
     passportNumber: '',
+    birthDate: '',
+    issuedBy: '',
+    issueDate: '',
     docType: 'inn', // 'inn' или 'snils'
     inn: '',
     snils: '',
@@ -61,61 +86,348 @@ const Charity = ({ onOpenPost }) => {
   const [postError, setPostError] = useState(null);
 
   useEffect(() => {
-    // Принудительно устанавливаем mode в 'initial' при монтировании компонента
-    // чтобы кнопки всегда показывались при открытии вкладки
-    setMode('initial');
-    // Очищаем поле ввода имени, чтобы оно было пустым
-    setHelperName('');
-    // Вкладка Рейтинг будет показываться только после того, как пользователь введет имя и нажмет "Продолжить"
-  }, []);
+    // Восстанавливаем дополнительные данные из localStorage при монтировании компонента
+    const phone = getPhone();
+    if (!phone) {
+      // Если номера еще нет, ждем его появления
+      const checkPhone = setInterval(() => {
+        const currentPhone = getPhone();
+        if (currentPhone) {
+          clearInterval(checkPhone);
+          // Восстанавливаем mode сначала
+          const savedMode = getStorageItem('charityMode', currentPhone);
+          if (savedMode && savedMode !== 'initial') {
+            setMode(savedMode);
+            console.log('Восстановлен режим после получения номера телефона:', savedMode);
+          }
+          // Восстанавливаем данные после получения номера
+          restoreDataForPhone(currentPhone);
+        }
+      }, 100);
+      return () => clearInterval(checkPhone);
+    }
+    
+    restoreDataForPhone(phone);
+  }, [mode]); // Запускаем при изменении mode, чтобы восстановить данные при восстановлении режима
+  
+  // Функция для восстановления данных для конкретного номера телефона
+  const restoreDataForPhone = (phone) => {
+    const savedMode = getStorageItem('charityMode', phone);
+    const savedHelperName = getStorageItem('helperName', phone);
+    
+    console.log('Восстановление дополнительных данных Charity:', { savedMode, savedHelperName, currentMode: mode, phone });
+    
+    // Если был режим "Я хочу помочь" (intro или posts), восстанавливаем имя
+    if ((mode === 'intro' || mode === 'posts') || savedMode === 'intro' || savedMode === 'posts') {
+      if (savedHelperName) {
+        setHelperName(savedHelperName);
+        console.log('Восстановлено имя:', savedHelperName);
+      }
+    }
+    
+    // Если был режим "Мне нужна помощь", восстанавливаем данные
+    const modeToCheck = savedMode || mode;
+    if (['passport', 'verifying', 'createPost', 'viewPost', 'processing'].includes(modeToCheck)) {
+      // Восстанавливаем данные паспорта
+      const savedPassportData = getStorageItem('passportData', phone);
+      if (savedPassportData) {
+        try {
+          setPassportData(savedPassportData);
+          const savedScans = getStorageItem('passportScansPreview', phone);
+          if (savedScans) {
+            setPassportScansPreview(savedScans);
+          }
+          console.log('Восстановлены данные паспорта');
+        } catch (e) {
+          console.error('Ошибка восстановления данных паспорта:', e);
+        }
+      }
+      
+      // Если был режим viewPost, восстанавливаем созданный пост
+      if (modeToCheck === 'viewPost') {
+        const savedCreatedPost = getStorageItem('createdPostData', phone);
+        if (savedCreatedPost) {
+          try {
+            setCreatedPost(savedCreatedPost);
+            setHelperPostData({
+              avatar: savedCreatedPost.avatar,
+              firstName: savedCreatedPost.firstName,
+              lastName: savedCreatedPost.lastName,
+              title: savedCreatedPost.title,
+              description: savedCreatedPost.description,
+              amount: savedCreatedPost.amount,
+              media: savedCreatedPost.media || []
+            });
+            if (savedCreatedPost.images && savedCreatedPost.images.length > 0) {
+              setHelperPostMediaPreview(savedCreatedPost.images);
+            }
+            if (savedCreatedPost.avatar) {
+              setHelperPostAvatarPreview(savedCreatedPost.avatar);
+            }
+            if (savedMode && savedMode !== mode) {
+              setMode(savedMode);
+            }
+            console.log('Восстановлен созданный пост');
+          } catch (e) {
+            console.error('Ошибка восстановления поста:', e);
+          }
+        }
+      }
+      
+      // Если был режим createPost, восстанавливаем данные формы
+      if (modeToCheck === 'createPost') {
+        const savedPostData = getStorageItem('helperPostData', phone);
+        if (savedPostData) {
+          try {
+            setHelperPostData(savedPostData);
+            const savedMedia = getStorageItem('helperPostMediaPreview', phone);
+            if (savedMedia) {
+              setHelperPostMediaPreview(savedMedia);
+            }
+            const savedAvatar = getStorageItem('helperPostAvatarPreview', phone);
+            if (savedAvatar) {
+              setHelperPostAvatarPreview(savedAvatar);
+            }
+            if (savedMode && savedMode !== mode) {
+              setMode(savedMode);
+            }
+            console.log('Восстановлены данные формы создания поста');
+          } catch (e) {
+            console.error('Ошибка восстановления данных поста:', e);
+          }
+        }
+      }
+      
+      // Если был режим posts или intro, восстанавливаем режим
+      if (savedMode && savedMode !== mode && ['posts', 'intro'].includes(savedMode)) {
+        setMode(savedMode);
+      }
+    }
+    
+    // Если есть сохраненный режим, но текущий режим - initial, восстанавливаем сохраненный
+    if (savedMode && savedMode !== 'initial' && mode === 'initial') {
+      setMode(savedMode);
+      console.log('Восстановлен режим из сохраненного:', savedMode);
+    }
+  };
+  
+  // Восстанавливаем helperName при монтировании и при изменении номера телефона
+  useEffect(() => {
+    const phone = getPhone();
+    if (!phone) {
+      // Если номера еще нет, ждем его появления
+      const checkPhone = setInterval(() => {
+        const currentPhone = getPhone();
+        if (currentPhone) {
+          clearInterval(checkPhone);
+          const savedHelperName = getStorageItem('helperName', currentPhone);
+          if (savedHelperName && savedHelperName.trim() !== '') {
+            setHelperName(savedHelperName);
+            console.log('Восстановлен helperName после получения номера телефона:', savedHelperName);
+          }
+        }
+      }, 100);
+      return () => clearInterval(checkPhone);
+    }
+    
+    const savedHelperName = getStorageItem('helperName', phone);
+    if (savedHelperName && savedHelperName.trim() !== '') {
+      setHelperName(savedHelperName);
+      console.log('Восстановлен helperName при монтировании:', savedHelperName, 'для телефона:', phone);
+    }
+  }, []); // Выполняется только при монтировании
+  
+  // Восстанавливаем данные при изменении номера телефона (слушаем изменения в localStorage)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const phone = getPhone();
+      if (phone) {
+        // Восстанавливаем mode
+        const savedMode = getStorageItem('charityMode', phone);
+        if (savedMode && savedMode !== mode) {
+          setMode(savedMode);
+          console.log('Восстановлен режим из storage:', savedMode);
+        }
+        
+        // Восстанавливаем helperName
+        const savedHelperName = getStorageItem('helperName', phone);
+        if (savedHelperName && savedHelperName !== helperName) {
+          setHelperName(savedHelperName);
+          console.log('Восстановлен helperName из storage:', savedHelperName);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Также слушаем кастомное событие для обновления в том же окне
+    window.addEventListener('currentPhoneChanged', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('currentPhoneChanged', handleStorageChange);
+    };
+  }, [mode, helperName]);
+  
+  // Сохраняем mode в localStorage при его изменении
+  const isFirstRender = useRef(true);
+  
+  useEffect(() => {
+    // Пропускаем сохранение при первом рендере, чтобы избежать перезаписи восстановленного состояния
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
+    const phone = getPhone();
+    // Не сохраняем 'initial' в localStorage
+    if (mode && mode !== 'initial') {
+      console.log('Сохранение режима в localStorage:', mode, 'для телефона:', phone);
+      setStorageItem('charityMode', mode, phone);
+    } else if (mode === 'initial') {
+      // Удаляем сохраненный режим только если явно установлен 'initial'
+      removeStorageItem('charityMode', phone);
+    }
+  }, [mode]);
+
 
   const handleWantToHelp = () => {
     setMode('intro');
+    // Сохранение произойдет автоматически через useEffect
   };
 
   const handleNeedHelp = async () => {
+    const phone = getPhone();
     // Удаляем helperName, чтобы скрыть вкладку Рейтинг для тех, кому нужна помощь
-    localStorage.removeItem('helperName');
+    removeStorageItem('helperName', phone);
     window.dispatchEvent(new Event('storage'));
     
     // Проверяем, есть ли сохраненные данные паспорта
-    const savedPassportData = localStorage.getItem('passportData');
-    if (savedPassportData) {
-      try {
-        const parsed = JSON.parse(savedPassportData);
-        setPassportData(parsed);
-        // Восстанавливаем превью сканов
-        const savedScans = localStorage.getItem('passportScansPreview');
-        if (savedScans) {
-          setPassportScansPreview(JSON.parse(savedScans));
+    const savedPassportData = getStorageItem('passportData', phone);
+    const savedMode = getStorageItem('charityMode', phone);
+    
+    // Если уже был сохраненный режим для "Мне нужна помощь", используем его
+    if (savedMode && ['passport', 'verifying', 'createPost', 'viewPost', 'processing'].includes(savedMode)) {
+      // Восстанавливаем состояние в зависимости от сохраненного режима
+      if (savedMode === 'viewPost') {
+        // Восстанавливаем просмотр поста
+        const savedCreatedPost = getStorageItem('createdPostData', phone);
+        if (savedCreatedPost) {
+          try {
+            const parsedPost = savedCreatedPost;
+            setCreatedPost(parsedPost);
+            setHelperPostData({
+              avatar: parsedPost.avatar,
+              firstName: parsedPost.firstName,
+              lastName: parsedPost.lastName,
+              title: parsedPost.title,
+              description: parsedPost.description,
+              amount: parsedPost.amount,
+              media: parsedPost.media || []
+            });
+            if (parsedPost.images && parsedPost.images.length > 0) {
+              setHelperPostMediaPreview(parsedPost.images);
+            }
+            if (parsedPost.avatar) {
+              setHelperPostAvatarPreview(parsedPost.avatar);
+            }
+            setMode('viewPost');
+            return;
+          } catch (e) {
+            console.error('Ошибка восстановления поста:', e);
+          }
         }
-        // Если верификация уже пройдена, переходим к созданию поста или просмотру
-        const verificationStatus = localStorage.getItem('verificationStatus');
-        if (verificationStatus === 'approved') {
-          // Проверяем, есть ли созданный пост
-          const savedCreatedPost = localStorage.getItem('createdPostData');
-          if (savedCreatedPost) {
-            try {
-              const parsedPost = JSON.parse(savedCreatedPost);
-              setCreatedPost(parsedPost);
-              setHelperPostData({
-                avatar: parsedPost.avatar,
-                firstName: parsedPost.firstName,
-                lastName: parsedPost.lastName,
-                title: parsedPost.title,
-                description: parsedPost.description,
-                amount: parsedPost.amount,
-                media: parsedPost.media || []
-              });
-              setMode('viewPost');
-              // Восстанавливаем превью
-              const savedMedia = localStorage.getItem('helperPostMediaPreview');
+      } else if (savedMode === 'createPost') {
+        // Восстанавливаем форму создания поста
+        if (savedPassportData) {
+          try {
+            setPassportData(savedPassportData);
+            const savedScans = getStorageItem('passportScansPreview', phone);
+            if (savedScans) {
+              setPassportScansPreview(savedScans);
+            }
+            const savedPostData = getStorageItem('helperPostData', phone);
+            if (savedPostData) {
+              setHelperPostData(savedPostData);
+              const savedMedia = getStorageItem('helperPostMediaPreview', phone);
               if (savedMedia) {
-                setHelperPostMediaPreview(JSON.parse(savedMedia));
+                setHelperPostMediaPreview(savedMedia);
               }
-              const savedAvatar = localStorage.getItem('helperPostAvatarPreview');
+              const savedAvatar = getStorageItem('helperPostAvatarPreview', phone);
               if (savedAvatar) {
                 setHelperPostAvatarPreview(savedAvatar);
+              }
+            }
+            setMode('createPost');
+            return;
+          } catch (e) {
+            console.error('Ошибка восстановления данных:', e);
+          }
+        }
+      } else if (savedMode === 'passport') {
+        // Восстанавливаем форму паспорта
+        if (savedPassportData) {
+          try {
+            setPassportData(savedPassportData);
+            const savedScans = getStorageItem('passportScansPreview', phone);
+            if (savedScans) {
+              setPassportScansPreview(savedScans);
+            }
+            setMode('passport');
+            return;
+          } catch (e) {
+            console.error('Ошибка восстановления данных паспорта:', e);
+          }
+        }
+      }
+    }
+    
+    if (savedPassportData) {
+      try {
+        setPassportData(savedPassportData);
+        // Восстанавливаем превью сканов
+        const savedScans = getStorageItem('passportScansPreview', phone);
+        if (savedScans) {
+          setPassportScansPreview(savedScans);
+        }
+        // Если верификация уже пройдена, переходим к созданию поста или просмотру
+        const verificationStatus = getStorageItem('verificationStatus', phone);
+        if (verificationStatus === 'approved') {
+          // Проверяем, есть ли созданный пост
+          const savedCreatedPost = getStorageItem('createdPostData', phone);
+          if (savedCreatedPost) {
+            try {
+              setCreatedPost(savedCreatedPost);
+              setHelperPostData({
+                avatar: savedCreatedPost.avatar,
+                firstName: savedCreatedPost.firstName,
+                lastName: savedCreatedPost.lastName,
+                title: savedCreatedPost.title,
+                description: savedCreatedPost.description,
+                amount: savedCreatedPost.amount,
+                media: savedCreatedPost.media || []
+              });
+              setMode('viewPost');
+              // Восстанавливаем превью фотографий из сохраненного поста или из localStorage
+              if (savedCreatedPost.images && savedCreatedPost.images.length > 0) {
+                setHelperPostMediaPreview(savedCreatedPost.images);
+              } else {
+                const savedMedia = getStorageItem('helperPostMediaPreview', phone);
+                if (savedMedia) {
+                  try {
+                    setHelperPostMediaPreview(savedMedia);
+                  } catch (e) {
+                    console.error('Ошибка восстановления превью фотографий:', e);
+                  }
+                }
+              }
+              // Восстанавливаем превью аватара
+              if (savedCreatedPost.avatar) {
+                setHelperPostAvatarPreview(savedCreatedPost.avatar);
+              } else {
+                const savedAvatar = getStorageItem('helperPostAvatarPreview', phone);
+                if (savedAvatar) {
+                  setHelperPostAvatarPreview(savedAvatar);
+                }
               }
             } catch (e) {
               console.error('Ошибка загрузки созданного поста:', e);
@@ -124,15 +436,14 @@ const Charity = ({ onOpenPost }) => {
           } else {
             setMode('createPost');
             // Восстанавливаем данные поста если есть
-            const savedPostData = localStorage.getItem('helperPostData');
+            const savedPostData = getStorageItem('helperPostData', phone);
             if (savedPostData) {
-              const parsedPost = JSON.parse(savedPostData);
-              setHelperPostData(parsedPost);
-              const savedMedia = localStorage.getItem('helperPostMediaPreview');
+              setHelperPostData(savedPostData);
+              const savedMedia = getStorageItem('helperPostMediaPreview', phone);
               if (savedMedia) {
-                setHelperPostMediaPreview(JSON.parse(savedMedia));
+                setHelperPostMediaPreview(savedMedia);
               }
-              const savedAvatar = localStorage.getItem('helperPostAvatarPreview');
+              const savedAvatar = getStorageItem('helperPostAvatarPreview', phone);
               if (savedAvatar) {
                 setHelperPostAvatarPreview(savedAvatar);
               }
@@ -153,10 +464,48 @@ const Charity = ({ onOpenPost }) => {
   // Обработчики для формы паспорта
   const handlePassportInputChange = (e) => {
     const { name, value } = e.target;
+    let processedValue = value;
+    
+    // Обработка ИНН - только цифры, максимум 12
+    if (name === 'inn') {
+      processedValue = value.replace(/\D/g, '').slice(0, 12);
+    }
+    
+    // Обработка СНИЛС - форматирование XXX-XXX-XXX XX
+    if (name === 'snils') {
+      let digits = value.replace(/\D/g, '').slice(0, 11);
+      if (digits.length > 0) {
+        let formatted = digits.slice(0, 3);
+        if (digits.length > 3) {
+          formatted += '-' + digits.slice(3, 6);
+        }
+        if (digits.length > 6) {
+          formatted += '-' + digits.slice(6, 9);
+        }
+        if (digits.length > 9) {
+          formatted += ' ' + digits.slice(9, 11);
+        }
+        processedValue = formatted;
+      } else {
+        processedValue = '';
+      }
+    }
+    
+    // Обработка серии паспорта - только цифры, максимум 4
+    if (name === 'passportSeries') {
+      processedValue = value.replace(/\D/g, '').slice(0, 4);
+    }
+    
+    // Обработка номера паспорта - только цифры, максимум 6
+    if (name === 'passportNumber') {
+      processedValue = value.replace(/\D/g, '').slice(0, 6);
+    }
+    
+    const phone = getPhone();
     setPassportData(prev => {
-      const updated = { ...prev, [name]: value };
+      const updated = { ...prev, [name]: processedValue };
       // Сохраняем в localStorage
-      localStorage.setItem('passportData', JSON.stringify(updated));
+      setStorageItem('passportData', updated, phone);
       return updated;
     });
   };
@@ -169,14 +518,14 @@ const Charity = ({ onOpenPost }) => {
     }
     
     const newFiles = files.filter(file => {
-      const maxSize = 10 * 1024 * 1024; // 10 МБ
+      const maxSize = 200 * 1024; // 200 КБ
       if (file.size > maxSize) {
-        alert(`Файл ${file.name} превышает 10 МБ`);
+        alert(`Файл ${file.name} превышает 200 КБ. Пожалуйста, выберите файл меньшего размера.`);
         return false;
       }
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      const allowedTypes = ['image/webp', 'image/jpeg', 'image/jpg'];
       if (!allowedTypes.includes(file.type)) {
-        alert(`Файл ${file.name} имеет неподдерживаемый формат`);
+        alert(`Файл ${file.name} имеет неподдерживаемый формат. Используйте WebP или JPEG.`);
         return false;
       }
       return true;
@@ -190,15 +539,17 @@ const Charity = ({ onOpenPost }) => {
     }));
     
     // Сохраняем превью в localStorage
-    localStorage.setItem('passportScansPreview', JSON.stringify([...passportScansPreview, ...newPreviews]));
+    const phone = getPhone();
+    setStorageItem('passportScansPreview', [...passportScansPreview, ...newPreviews], phone);
   };
 
   const removePassportScan = (index) => {
+    const phone = getPhone();
     const newPreviews = passportScansPreview.filter((_, i) => i !== index);
     const newFiles = passportData.passportScans.filter((_, i) => i !== index);
     setPassportScansPreview(newPreviews);
     setPassportData(prev => ({ ...prev, passportScans: newFiles }));
-    localStorage.setItem('passportScansPreview', JSON.stringify(newPreviews));
+    setStorageItem('passportScansPreview', newPreviews, phone);
   };
 
   const handlePassportSubmit = async (e) => {
@@ -214,11 +565,59 @@ const Charity = ({ onOpenPost }) => {
       if (!passportData.passportSeries || !passportData.passportNumber) {
         throw new Error('Серия и номер паспорта обязательны');
       }
-      if (passportData.docType === 'inn' && !passportData.inn) {
-        throw new Error('ИНН обязателен для заполнения');
+      const seriesDigits = passportData.passportSeries.replace(/\D/g, '');
+      const numberDigits = passportData.passportNumber.replace(/\D/g, '');
+      if (seriesDigits.length !== 4) {
+        throw new Error('Серия паспорта должна содержать 4 цифры');
       }
-      if (passportData.docType === 'snils' && !passportData.snils) {
-        throw new Error('СНИЛС обязателен для заполнения');
+      if (numberDigits.length !== 6) {
+        throw new Error('Номер паспорта должен содержать 6 цифр');
+      }
+      if (!passportData.birthDate) {
+        throw new Error('Дата рождения обязательна для заполнения');
+      }
+      // Проверка возраста (должно быть 18+)
+      const birthDate = new Date(passportData.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+      const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+      if (actualAge < 18) {
+        throw new Error('Вам должно быть не менее 18 лет для создания поста');
+      }
+      if (!passportData.issuedBy) {
+        throw new Error('Поле "Кем выдан" обязательно для заполнения');
+      }
+      if (!passportData.issueDate) {
+        throw new Error('Поле "Когда выдан" обязательно для заполнения');
+      }
+      // Проверка, что дата выдачи не в будущем
+      const issueDate = new Date(passportData.issueDate);
+      if (issueDate > today) {
+        throw new Error('Дата выдачи не может быть в будущем');
+      }
+      // Проверка, что дата выдачи не раньше даты рождения
+      if (issueDate < birthDate) {
+        throw new Error('Дата выдачи не может быть раньше даты рождения');
+      }
+      if (passportData.docType === 'inn') {
+        if (!passportData.inn) {
+          throw new Error('ИНН обязателен для заполнения');
+        }
+        const innDigits = passportData.inn.replace(/\D/g, '');
+        if (innDigits.length !== 12) {
+          throw new Error('ИНН должен содержать 12 цифр');
+        }
+      }
+      if (passportData.docType === 'snils') {
+        if (!passportData.snils) {
+          throw new Error('СНИЛС обязателен для заполнения');
+        }
+        const snilsDigits = passportData.snils.replace(/\D/g, '');
+        if (snilsDigits.length !== 11) {
+          throw new Error('СНИЛС должен содержать 11 цифр');
+        }
       }
       if (passportData.passportScans.length < 2) {
         throw new Error('Необходимо загрузить минимум 2 скана паспорта');
@@ -228,11 +627,12 @@ const Charity = ({ onOpenPost }) => {
       // Пока что просто переходим к модальному окну проверки
       setMode('verifying');
       
-      // Имитируем проверку (в реальности здесь будет вызов API)
-      setTimeout(() => {
-        localStorage.setItem('verificationStatus', 'approved');
-        setMode('createPost');
-      }, 3000); // 3 секунды для демонстрации
+             // Имитируем проверку (в реальности здесь будет вызов API)
+             const phone = getPhone();
+             setTimeout(() => {
+               setStorageItem('verificationStatus', 'approved', phone);
+               setMode('createPost');
+             }, 3000); // 3 секунды для демонстрации
       
     } catch (err) {
       setPassportError(err.message || 'Ошибка при отправке данных');
@@ -244,10 +644,17 @@ const Charity = ({ onOpenPost }) => {
   const handleHelperFormSubmit = (e) => {
     e.preventDefault();
     if (helperName.trim()) {
-      localStorage.setItem('helperName', helperName);
+      const phone = getPhone();
+      setStorageItem('helperName', helperName, phone);
+      console.log('Сохранен helperName:', helperName, 'для телефона:', phone);
       setMode('posts');
+      // Сохранение charityMode произойдет автоматически через useEffect
       // Триггерим событие для обновления вкладки Рейтинг
       window.dispatchEvent(new Event('storage'));
+      // Также вызываем проверку напрямую через небольшой таймаут
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage'));
+      }, 100);
     }
   };
 
@@ -345,29 +752,38 @@ const Charity = ({ onOpenPost }) => {
   // Обработчики для формы создания поста (для "Я хочу помочь")
   const handleHelperPostInputChange = (e) => {
     const { name, value } = e.target;
-    setHelperPostData(prev => ({ ...prev, [name]: value }));
+    let processedValue = value;
+    
+    // Для поля суммы - только цифры
+    if (name === 'amount') {
+      processedValue = value.replace(/\D/g, '');
+    }
+    
+    const phone = getPhone();
+    setHelperPostData(prev => ({ ...prev, [name]: processedValue }));
     // Сохраняем в localStorage
-    const updated = { ...helperPostData, [name]: value };
-    localStorage.setItem('helperPostData', JSON.stringify(updated));
+    const updated = { ...helperPostData, [name]: processedValue };
+    setStorageItem('helperPostData', updated, phone);
   };
 
   const handleHelperPostAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const maxSize = 5 * 1024 * 1024; // 5 МБ
+      const maxSize = 200 * 1024; // 200 КБ
       if (file.size > maxSize) {
-        alert('Размер файла превышает 5 МБ');
+        alert('Размер файла превышает 200 КБ. Пожалуйста, выберите файл меньшего размера.');
         return;
       }
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      const allowedTypes = ['image/webp', 'image/jpeg', 'image/jpg'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Неподдерживаемый формат файла. Используйте JPG или PNG');
+        alert('Неподдерживаемый формат файла. Используйте WebP или JPEG.');
         return;
       }
-      const preview = URL.createObjectURL(file);
-      setHelperPostAvatarPreview(preview);
-      setHelperPostData(prev => ({ ...prev, avatar: file }));
-      localStorage.setItem('helperPostAvatarPreview', preview);
+             const phone = getPhone();
+             const preview = URL.createObjectURL(file);
+             setHelperPostAvatarPreview(preview);
+             setHelperPostData(prev => ({ ...prev, avatar: file }));
+             setStorageItem('helperPostAvatarPreview', preview, phone);
     }
   };
 
@@ -379,29 +795,36 @@ const Charity = ({ onOpenPost }) => {
     }
     
     const newFiles = files.filter(file => {
-      const maxSize = 10 * 1024 * 1024; // 10 МБ
+      const maxSize = 200 * 1024; // 200 КБ
       if (file.size > maxSize) {
-        alert(`Файл ${file.name} превышает 10 МБ`);
+        alert(`Файл ${file.name} превышает 200 КБ. Пожалуйста, выберите файл меньшего размера.`);
+        return false;
+      }
+      const allowedTypes = ['image/webp', 'image/jpeg', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        alert(`Файл ${file.name} имеет неподдерживаемый формат. Используйте WebP или JPEG.`);
         return false;
       }
       return true;
     });
 
-    const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-    setHelperPostMediaPreview(prev => [...prev, ...newPreviews]);
-    setHelperPostData(prev => ({
-      ...prev,
-      media: [...prev.media, ...newFiles]
-    }));
-    localStorage.setItem('helperPostMediaPreview', JSON.stringify([...helperPostMediaPreview, ...newPreviews]));
+           const phone = getPhone();
+           const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+           setHelperPostMediaPreview(prev => [...prev, ...newPreviews]);
+           setHelperPostData(prev => ({
+             ...prev,
+             media: [...prev.media, ...newFiles]
+           }));
+           setStorageItem('helperPostMediaPreview', [...helperPostMediaPreview, ...newPreviews], phone);
   };
 
   const removeHelperPostMedia = (index) => {
-    const newPreviews = helperPostMediaPreview.filter((_, i) => i !== index);
-    const newFiles = helperPostData.media.filter((_, i) => i !== index);
-    setHelperPostMediaPreview(newPreviews);
-    setHelperPostData(prev => ({ ...prev, media: newFiles }));
-    localStorage.setItem('helperPostMediaPreview', JSON.stringify(newPreviews));
+           const phone = getPhone();
+           const newPreviews = helperPostMediaPreview.filter((_, i) => i !== index);
+           const newFiles = helperPostData.media.filter((_, i) => i !== index);
+           setHelperPostMediaPreview(newPreviews);
+           setHelperPostData(prev => ({ ...prev, media: newFiles }));
+           setStorageItem('helperPostMediaPreview', newPreviews, phone);
   };
 
   const handleHelperPostSubmit = async (e) => {
@@ -430,19 +853,28 @@ const Charity = ({ onOpenPost }) => {
       // Показываем модальное окно обработки
       setMode('processing');
       
-      // Имитируем создание поста (в реальности здесь будет вызов API)
+      // Имитируем создание или обновление поста (в реальности здесь будет вызов API)
       setTimeout(() => {
-        // Сохраняем данные поста
-        const postData = {
-          id: Date.now(), // Временный ID, в реальности будет от API
-          ...helperPostData,
-          createdAt: new Date().toISOString(),
-          status: 'active'
-        };
-        setCreatedPost(postData);
-        localStorage.setItem('helperPostCreated', 'true');
-        localStorage.setItem('createdPostData', JSON.stringify(postData));
-        setMode('viewPost');
+        // Если пост уже существует (редактирование), обновляем его, иначе создаем новый
+        const isEditing = createdPost !== null;
+               const phone = getPhone();
+               const postData = {
+                 id: isEditing ? createdPost.id : Date.now(), // Сохраняем существующий ID при редактировании
+                 ...helperPostData,
+                 createdAt: isEditing ? createdPost.createdAt : new Date().toISOString(), // Сохраняем исходную дату создания
+                 status: 'active',
+                 images: helperPostMediaPreview, // Сохраняем превью фотографий
+                 avatar: helperPostAvatarPreview // Сохраняем превью аватара
+               };
+               setCreatedPost(postData);
+               setStorageItem('helperPostCreated', 'true', phone);
+               setStorageItem('createdPostData', postData, phone);
+               // Также сохраняем превью отдельно для восстановления
+               setStorageItem('helperPostMediaPreview', helperPostMediaPreview, phone);
+               if (helperPostAvatarPreview) {
+                 setStorageItem('helperPostAvatarPreview', helperPostAvatarPreview, phone);
+               }
+               setMode('viewPost');
       }, 2000); // 2 секунды для демонстрации
       
     } catch (err) {
@@ -611,7 +1043,7 @@ const Charity = ({ onOpenPost }) => {
                     type="text"
                     id="firstName"
                     name="firstName"
-                    placeholder="Введите имя"
+                    placeholder="Например: Иван"
                     value={passportData.firstName}
                     onChange={handlePassportInputChange}
                     required
@@ -630,7 +1062,7 @@ const Charity = ({ onOpenPost }) => {
                     type="text"
                     id="lastName"
                     name="lastName"
-                    placeholder="Введите фамилию"
+                    placeholder="Например: Иванов"
                     value={passportData.lastName}
                     onChange={handlePassportInputChange}
                     required
@@ -649,7 +1081,7 @@ const Charity = ({ onOpenPost }) => {
                     type="text"
                     id="middleName"
                     name="middleName"
-                    placeholder="Введите отчество (необязательно)"
+                    placeholder="Например: Иванович (необязательно)"
                     value={passportData.middleName}
                     onChange={handlePassportInputChange}
                   />
@@ -667,7 +1099,7 @@ const Charity = ({ onOpenPost }) => {
                     type="text"
                     id="passportSeries"
                     name="passportSeries"
-                    placeholder="0000"
+                    placeholder="Например: 1234"
                     value={passportData.passportSeries}
                     onChange={handlePassportInputChange}
                     required
@@ -687,11 +1119,75 @@ const Charity = ({ onOpenPost }) => {
                     type="text"
                     id="passportNumber"
                     name="passportNumber"
-                    placeholder="000000"
+                    placeholder="Например: 123456"
                     value={passportData.passportNumber}
                     onChange={handlePassportInputChange}
                     required
                     maxLength="6"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="birthDate">Дата рождения *</label>
+                <div className="input-wrapper">
+                  <svg className="input-icon" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <input
+                    type="date"
+                    id="birthDate"
+                    name="birthDate"
+                    value={passportData.birthDate}
+                    onChange={handlePassportInputChange}
+                    required
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div style={{ marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
+                  Вам должно быть не менее 18 лет
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="issuedBy">Кем выдан *</label>
+                <div className="input-wrapper">
+                  <svg className="input-icon" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                  <input
+                    type="text"
+                    id="issuedBy"
+                    name="issuedBy"
+                    placeholder="Например: УФМС России по г. Москве"
+                    value={passportData.issuedBy}
+                    onChange={handlePassportInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="issueDate">Когда выдан *</label>
+                <div className="input-wrapper">
+                  <svg className="input-icon" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <input
+                    type="date"
+                    id="issueDate"
+                    name="issueDate"
+                    value={passportData.issueDate}
+                    onChange={handlePassportInputChange}
+                    required
+                    max={new Date().toISOString().split('T')[0]}
                   />
                 </div>
               </div>
@@ -733,10 +1229,11 @@ const Charity = ({ onOpenPost }) => {
                       type="text"
                       id="inn"
                       name="inn"
-                      placeholder="Введите ИНН"
+                      placeholder="Например: 123456789012 (12 цифр)"
                       value={passportData.inn}
                       onChange={handlePassportInputChange}
                       required
+                      maxLength="12"
                     />
                   </div>
                 </div>
@@ -753,10 +1250,11 @@ const Charity = ({ onOpenPost }) => {
                       type="text"
                       id="snils"
                       name="snils"
-                      placeholder="Введите СНИЛС"
+                      placeholder="Например: 123-456-789 01"
                       value={passportData.snils}
                       onChange={handlePassportInputChange}
                       required
+                      maxLength="14"
                     />
                   </div>
                 </div>
@@ -769,26 +1267,48 @@ const Charity = ({ onOpenPost }) => {
                     type="file"
                     id="passportScans"
                     multiple
-                    accept="image/jpeg,image/png,image/jpg,application/pdf"
+                    accept="image/webp,image/jpeg,image/jpg"
                     onChange={handlePassportScansChange}
                     style={{ display: 'none' }}
                   />
-                  <button
-                    type="button"
+                  <div
                     onClick={() => document.getElementById('passportScans').click()}
                     style={{
-                      padding: '12px 24px',
-                      background: 'rgba(59, 130, 246, 0.1)',
-                      border: '1px dashed #3b82f6',
+                      padding: '20px',
+                      background: 'rgba(59, 130, 246, 0.05)',
+                      border: '2px dashed #3b82f6',
                       borderRadius: '12px',
-                      color: '#3b82f6',
                       cursor: 'pointer',
                       width: '100%',
-                      fontSize: '14px'
+                      textAlign: 'center',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                      e.currentTarget.style.borderColor = '#2563eb';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)';
+                      e.currentTarget.style.borderColor = '#3b82f6';
                     }}
                   >
-                    + Загрузить сканы
-                  </button>
+                    <svg viewBox="0 0 24 24" style={{ width: '32px', height: '32px', stroke: '#3b82f6', margin: '0 auto 12px', strokeWidth: '2', fill: 'none' }}>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <div style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                      + Загрузить сканы
+                    </div>
+                    <div style={{ color: '#64748b', fontSize: '12px', lineHeight: '1.6' }}>
+                      <div style={{ marginBottom: '4px' }}>
+                        <strong style={{ color: '#94a3b8' }}>Максимальный размер файла:</strong> 200 КБ
+                      </div>
+                      <div>
+                        <strong style={{ color: '#94a3b8' }}>Формат:</strong> <span style={{ color: '#10b981' }}>WebP</span>, <span style={{ color: '#fbbf24' }}>JPEG</span>
+                      </div>
+                    </div>
+                  </div>
                   {passportScansPreview.length > 0 && (
                     <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '12px' }}>
                       {passportScansPreview.map((preview, index) => (
@@ -897,8 +1417,8 @@ const Charity = ({ onOpenPost }) => {
       {mode === 'createPost' && (
         <div id="createPostForm">
           <div className="intro-form">
-            <h2>Создать пост</h2>
-            <p>Заполните информацию о вашем посте</p>
+            <h2>{createdPost ? 'Редактировать пост' : 'Создать пост'}</h2>
+            <p>{createdPost ? 'Измените информацию о вашем посте' : 'Заполните информацию о вашем посте'}</p>
             <form onSubmit={handleHelperPostSubmit}>
               {/* Аватар */}
               <div className="form-group">
@@ -933,29 +1453,51 @@ const Charity = ({ onOpenPost }) => {
                       </svg>
                     </div>
                   )}
-                  <div>
+                  <div style={{ width: '100%' }}>
                     <input
                       type="file"
                       id="helperPostAvatar"
-                      accept="image/jpeg,image/png,image/jpg"
+                      accept="image/webp,image/jpeg,image/jpg"
                       onChange={handleHelperPostAvatarChange}
                       style={{ display: 'none' }}
                     />
-                    <button
-                      type="button"
+                    <div
                       onClick={() => document.getElementById('helperPostAvatar').click()}
                       style={{
-                        padding: '8px 16px',
-                        background: 'rgba(59, 130, 246, 0.1)',
-                        border: '1px solid #3b82f6',
-                        borderRadius: '8px',
-                        color: '#3b82f6',
+                        padding: '16px',
+                        background: 'rgba(59, 130, 246, 0.05)',
+                        border: '2px dashed #3b82f6',
+                        borderRadius: '12px',
                         cursor: 'pointer',
-                        fontSize: '14px'
+                        textAlign: 'center',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                        e.currentTarget.style.borderColor = '#2563eb';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)';
+                        e.currentTarget.style.borderColor = '#3b82f6';
                       }}
                     >
-                      {helperPostAvatarPreview ? 'Изменить' : 'Загрузить'}
-                    </button>
+                      <svg viewBox="0 0 24 24" style={{ width: '28px', height: '28px', stroke: '#3b82f6', margin: '0 auto 8px', strokeWidth: '2', fill: 'none' }}>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                      </svg>
+                      <div style={{ color: '#3b82f6', fontSize: '14px', fontWeight: '600', marginBottom: '6px' }}>
+                        {helperPostAvatarPreview ? 'Изменить фото' : 'Загрузить фото'}
+                      </div>
+                      <div style={{ color: '#64748b', fontSize: '11px', lineHeight: '1.5' }}>
+                        <div style={{ marginBottom: '2px' }}>
+                          <strong style={{ color: '#94a3b8' }}>Макс. размер:</strong> 200 КБ
+                        </div>
+                        <div>
+                          <strong style={{ color: '#94a3b8' }}>Формат:</strong> <span style={{ color: '#10b981' }}>WebP</span>, <span style={{ color: '#fbbf24' }}>JPEG</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1058,27 +1600,57 @@ const Charity = ({ onOpenPost }) => {
                     type="file"
                     id="helperPostMedia"
                     multiple
-                    accept="image/*,video/*"
+                    accept="image/webp,image/jpeg,image/jpg"
                     onChange={handleHelperPostMediaChange}
                     style={{ display: 'none' }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('helperPostMedia').click()}
-                    disabled={helperPostMediaPreview.length >= 3}
+                  <div
+                    onClick={() => {
+                      if (helperPostMediaPreview.length < 3) {
+                        document.getElementById('helperPostMedia').click();
+                      }
+                    }}
                     style={{
-                      padding: '12px 24px',
-                      background: helperPostMediaPreview.length >= 3 ? 'rgba(30, 41, 59, 0.5)' : 'rgba(59, 130, 246, 0.1)',
-                      border: `1px dashed ${helperPostMediaPreview.length >= 3 ? '#334155' : '#3b82f6'}`,
+                      padding: '20px',
+                      background: helperPostMediaPreview.length >= 3 ? 'rgba(30, 41, 59, 0.3)' : 'rgba(59, 130, 246, 0.05)',
+                      border: `2px dashed ${helperPostMediaPreview.length >= 3 ? '#334155' : '#3b82f6'}`,
                       borderRadius: '12px',
-                      color: helperPostMediaPreview.length >= 3 ? '#64748b' : '#3b82f6',
                       cursor: helperPostMediaPreview.length >= 3 ? 'not-allowed' : 'pointer',
                       width: '100%',
-                      fontSize: '14px'
+                      textAlign: 'center',
+                      transition: 'all 0.2s',
+                      opacity: helperPostMediaPreview.length >= 3 ? 0.6 : 1
+                    }}
+                    onMouseEnter={(e) => {
+                      if (helperPostMediaPreview.length < 3) {
+                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                        e.currentTarget.style.borderColor = '#2563eb';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (helperPostMediaPreview.length < 3) {
+                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)';
+                        e.currentTarget.style.borderColor = '#3b82f6';
+                      }
                     }}
                   >
-                    + Загрузить вложения ({helperPostMediaPreview.length}/3)
-                  </button>
+                    <svg viewBox="0 0 24 24" style={{ width: '32px', height: '32px', stroke: helperPostMediaPreview.length >= 3 ? '#64748b' : '#3b82f6', margin: '0 auto 12px', strokeWidth: '2', fill: 'none' }}>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <div style={{ color: helperPostMediaPreview.length >= 3 ? '#64748b' : '#3b82f6', fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                      + Загрузить вложения ({helperPostMediaPreview.length}/3)
+                    </div>
+                    <div style={{ color: '#64748b', fontSize: '12px', lineHeight: '1.6' }}>
+                      <div style={{ marginBottom: '4px' }}>
+                        <strong style={{ color: '#94a3b8' }}>Максимальный размер файла:</strong> 200 КБ
+                      </div>
+                      <div>
+                        <strong style={{ color: '#94a3b8' }}>Формат:</strong> <span style={{ color: '#10b981' }}>WebP</span>, <span style={{ color: '#fbbf24' }}>JPEG</span>
+                      </div>
+                    </div>
+                  </div>
                   {helperPostMediaPreview.length > 0 && (
                     <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
                       {helperPostMediaPreview.map((preview, index) => (
@@ -1122,28 +1694,24 @@ const Charity = ({ onOpenPost }) => {
 
               {/* Сумма сбора */}
               <div className="form-group">
-                <label htmlFor="helperPostAmount">Сумма сбора (₽) *</label>
+                <label htmlFor="helperPostAmount">Сумма сбора *</label>
                 <div style={{ marginBottom: '8px', fontSize: '12px', color: '#f59e0b' }}>
                   ⚠️ Внимание: сумму сбора нельзя будет изменить после создания поста
                 </div>
                 <div className="input-wrapper">
-                  <svg className="input-icon" viewBox="0 0 24 24">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                  </svg>
                   <input
-                    type="number"
+                    type="text"
                     id="helperPostAmount"
                     name="amount"
                     placeholder="Введите сумму сбора"
                     value={helperPostData.amount}
                     onChange={handleHelperPostInputChange}
                     required
-                    min="1"
                     disabled={createdPost !== null} // Блокируем изменение если пост уже создан
                     style={{
                       opacity: createdPost !== null ? 0.6 : 1,
-                      cursor: createdPost !== null ? 'not-allowed' : 'text'
+                      cursor: createdPost !== null ? 'not-allowed' : 'text',
+                      paddingLeft: '16px'
                     }}
                   />
                 </div>
@@ -1161,7 +1729,7 @@ const Charity = ({ onOpenPost }) => {
               )}
 
               <button type="submit" className="submit-button" disabled={helperPostLoading}>
-                {helperPostLoading ? 'Создание...' : 'Создать пост'}
+                {helperPostLoading ? (createdPost ? 'Сохранение...' : 'Создание...') : (createdPost ? 'Сохранить' : 'Создать пост')}
               </button>
             </form>
           </div>
@@ -1228,97 +1796,95 @@ const Charity = ({ onOpenPost }) => {
       {/* Просмотр и редактирование созданного поста (для "Мне нужна помощь") */}
       {mode === 'viewPost' && createdPost && (
         <div id="viewPost">
-          <div className="intro-form">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2>Ваш пост</h2>
-              <button
-                onClick={() => {
-                  // Переключаемся в режим редактирования
-                  setMode('createPost');
-                }}
-                style={{
-                  padding: '8px 16px',
-                  background: 'rgba(59, 130, 246, 0.1)',
-                  border: '1px solid #3b82f6',
-                  borderRadius: '8px',
-                  color: '#3b82f6',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                Редактировать
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '24px' }}>
-              {helperPostAvatarPreview && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-                  <img
-                    src={helperPostAvatarPreview}
-                    alt="Аватар"
-                    style={{
-                      width: '80px',
-                      height: '80px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid #334155'
-                    }}
-                  />
-                  <div>
-                    <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
-                      {createdPost.firstName} {createdPost.lastName}
-                    </h3>
-                  </div>
-                </div>
+          <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ color: '#f1f5f9', fontSize: '24px', fontWeight: '700', margin: 0 }}>Ваш пост</h2>
+            <button
+              onClick={() => {
+                // Переключаемся в режим редактирования
+                setMode('createPost');
+              }}
+              style={{
+                padding: '8px 16px',
+                background: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid #3b82f6',
+                borderRadius: '8px',
+                color: '#3b82f6',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '600'
+              }}
+            >
+              Редактировать
+            </button>
+          </div>
+          
+          <div className="posts-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+            <div 
+              className="post-card"
+              style={{ '--progress-width': '0%' }}
+              onClick={() => onOpenPost({
+                id: createdPost.id,
+                title: createdPost.title,
+                description: createdPost.description,
+                amount: parseFloat(createdPost.amount),
+                collected: 0,
+                authorName: `${createdPost.firstName} ${createdPost.lastName}`,
+                avatar: createdPost.avatar || helperPostAvatarPreview,
+                images: createdPost.images || helperPostMediaPreview,
+                image: (createdPost.images && createdPost.images[0]) || (helperPostMediaPreview && helperPostMediaPreview[0])
+              })}
+            >
+              {((createdPost.images && createdPost.images.length > 0) || (helperPostMediaPreview && helperPostMediaPreview.length > 0)) ? (
+                <img 
+                  src={(createdPost.images && createdPost.images[0]) || (helperPostMediaPreview && helperPostMediaPreview[0])} 
+                  alt={createdPost.title || 'Пост'} 
+                  className="post-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="post-image" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' }}></div>
               )}
-              
-              <div style={{ marginBottom: '16px' }}>
-                <h3 style={{ marginBottom: '8px', color: 'var(--text-primary)' }}>{createdPost.title}</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                  {createdPost.description}
-                </p>
-              </div>
-              
-              {helperPostMediaPreview.length > 0 && (
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-                  gap: '12px',
-                  marginBottom: '16px'
-                }}>
-                  {helperPostMediaPreview.map((preview, index) => (
-                    <img
-                      key={index}
-                      src={preview}
-                      alt={`Вложение ${index + 1}`}
-                      style={{
-                        width: '100%',
-                        height: '200px',
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                        border: '1px solid #334155'
+              <div className="post-content">
+                <div className="post-author">
+                  {(createdPost.avatar || helperPostAvatarPreview) ? (
+                    <img 
+                      src={createdPost.avatar || helperPostAvatarPreview} 
+                      alt={`${createdPost.firstName} ${createdPost.lastName}`} 
+                      className="post-avatar"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
                       }}
                     />
-                  ))}
-                </div>
-              )}
-              
-              <div style={{
-                padding: '16px',
-                background: 'rgba(59, 130, 246, 0.1)',
-                borderRadius: '12px',
-                border: '1px solid #3b82f6'
-              }}>
-                <div>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>Сумма сбора</div>
-                  <div style={{ fontSize: '24px', fontWeight: '600', color: '#3b82f6' }}>
-                    ₽ {parseFloat(createdPost.amount).toLocaleString('ru-RU')}
+                  ) : (
+                    <div className="post-avatar" style={{ 
+                      background: 'rgba(59, 130, 246, 0.2)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center' 
+                    }}>
+                      <svg style={{ width: '20px', height: '20px', stroke: '#3b82f6' }} viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </div>
+                  )}
+                  <div className="post-author-info">
+                    <div className="post-author-name">
+                      {createdPost.firstName} {createdPost.lastName}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
-                    ⚠️ Сумма не может быть изменена
+                </div>
+                <h3 className="post-title">{createdPost.title || 'Без названия'}</h3>
+                <div className="amount-display" style={{ '--progress-width': '0%' }}>
+                  <div className="amount-display-content">
+                    <span className="amount-display-collected">0</span>
+                    <span className="amount-display-target">{parseFloat(createdPost.amount).toLocaleString('ru-RU')}</span>
                   </div>
                 </div>
               </div>
+              <div className="post-id">ID: {generatePostId(createdPost.id)}</div>
             </div>
           </div>
         </div>
@@ -1359,6 +1925,23 @@ const Charity = ({ onOpenPost }) => {
                 const progress = amount > 0 ? (collected / amount * 100) : 0;
                 const uniqueId = generatePostId(post.id);
                 
+                // Используем уже преобразованные данные из контекста
+                const postImages = post.images && Array.isArray(post.images) ? post.images : [];
+                const authorAvatar = post.author?.avatar || post.avatar || null;
+                const authorName = post.author?.name || post.user?.name || 'Аноним';
+                
+                // Логируем для первого поста
+                if (postsToShow.indexOf(post) === 0) {
+                  console.log('Отображение поста в Charity:', {
+                    postId: post.id,
+                    postTitle: post.title,
+                    postImages: postImages,
+                    postImagesLength: postImages.length,
+                    firstImageUrl: postImages.length > 0 ? postImages[0] : null,
+                    allPostData: post
+                  });
+                }
+                
                 return (
                   <div 
                     key={post.id || Math.random()} 
@@ -1366,12 +1949,23 @@ const Charity = ({ onOpenPost }) => {
                     onClick={() => onOpenPost(post)}
                     style={{ '--progress-width': `${progress}%` }}
                   >
-                    {post.images && post.images.length > 0 ? (
+                    {postImages.length > 0 ? (
                       <img 
-                        src={post.images[0]} 
+                        src={postImages[0]} 
                         alt={post.title || 'Пост'} 
                         className="post-image"
+                        onLoad={() => {
+                          if (postsToShow.indexOf(post) === 0) {
+                            console.log('Изображение успешно загружено:', postImages[0]);
+                          }
+                        }}
                         onError={(e) => {
+                          console.error('Ошибка загрузки изображения поста:', {
+                            url: postImages[0],
+                            postId: post.id,
+                            postTitle: post.title,
+                            allImages: postImages
+                          });
                           e.target.style.display = 'none';
                         }}
                       />
@@ -1380,12 +1974,13 @@ const Charity = ({ onOpenPost }) => {
                     )}
                     <div className="post-content">
                       <div className="post-author">
-                        {post.author?.avatar ? (
+                        {authorAvatar ? (
                           <img 
-                            src={post.author.avatar} 
-                            alt={post.author?.name || 'Автор'} 
+                            src={authorAvatar} 
+                            alt={authorName} 
                             className="post-avatar"
                             onError={(e) => {
+                              console.error('Ошибка загрузки аватара:', authorAvatar);
                               e.target.style.display = 'none';
                             }}
                           />
@@ -1404,17 +1999,15 @@ const Charity = ({ onOpenPost }) => {
                         )}
                         <div className="post-author-info">
                           <div className="post-author-name">
-                            {post.author?.name || post.user?.name || 'Аноним'}
+                            {authorName}
                           </div>
                         </div>
                       </div>
                       <h3 className="post-title">{post.title || 'Без названия'}</h3>
-                      <div className="post-amount">
-                        <div className="post-amount-content">
-                          <span className="post-amount-currency">₽</span>
-                          <span className="post-amount-target">
-                            {amount.toLocaleString('ru-RU')}
-                          </span>
+                      <div className="amount-display" style={{ '--progress-width': `${progress}%` }}>
+                        <div className="amount-display-content">
+                          <span className="amount-display-collected">{(post.collected || 0).toLocaleString('ru-RU')}</span>
+                          <span className="amount-display-target">{amount.toLocaleString('ru-RU')}</span>
                         </div>
                       </div>
                     </div>

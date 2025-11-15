@@ -17,8 +17,43 @@ const PostDetail = ({ post, isOpen, onClose }) => {
 
   if (!isOpen || !post) return null;
 
-  const images = post.images && post.images.length > 0 ? post.images : [post.image || '/placeholder.svg'];
+  // Обрабатываем изображения: проверяем разные возможные поля
+  let images = [];
+  if (post.images && Array.isArray(post.images) && post.images.length > 0) {
+    images = post.images;
+  } else if (post.media && Array.isArray(post.media) && post.media.length > 0) {
+    images = post.media;
+  } else if (post.image) {
+    images = [post.image];
+  } else if (post.photo) {
+    images = [post.photo];
+  } else {
+    images = ['/placeholder.svg'];
+  }
+  
   const totalImages = images.length;
+  
+  // Обрабатываем аватар автора
+  let authorAvatar = post.avatar || 
+                    post.author?.avatar || 
+                    post.author?.photo || 
+                    post.author?.image ||
+                    post.user?.avatar ||
+                    post.user?.photo ||
+                    post.user?.image ||
+                    '/placeholder-avatar.svg';
+  
+  // Обрабатываем имя автора
+  let authorName = post.authorName ||
+                   post.author?.name ||
+                   (post.author?.firstName && post.author?.lastName 
+                     ? `${post.author.firstName} ${post.author.lastName}` 
+                     : null) ||
+                   post.user?.name ||
+                   (post.user?.firstName && post.user?.lastName 
+                     ? `${post.user.firstName} ${post.user.lastName}` 
+                     : null) ||
+                   'Неизвестный автор';
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
@@ -73,9 +108,9 @@ const PostDetail = ({ post, isOpen, onClose }) => {
 
         <div className="post-detail-body">
           <div className="detail-author">
-            <img src={post.avatar || '/placeholder-avatar.svg'} alt={post.authorName || 'Автор'} className="detail-avatar" />
+            <img src={authorAvatar} alt={authorName} className="detail-avatar" />
             <div className="detail-author-info">
-              <h3>{post.authorName || 'Неизвестный автор'}</h3>
+              <h3>{authorName}</h3>
               <p>Нуждается в помощи</p>
             </div>
           </div>
@@ -83,29 +118,10 @@ const PostDetail = ({ post, isOpen, onClose }) => {
           <h2 className="post-detail-title">{post.title || 'Без названия'}</h2>
           <p className="post-detail-description">{post.description || 'Описание отсутствует.'}</p>
 
-          <div className="post-detail-info">
-            <div className="info-row">
-              <span className="info-label">Собрано:</span>
-              <span className="info-value">{(post.collected || 0).toLocaleString('ru-RU')} ₽</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Цель:</span>
-              <span className="info-value">{post.amount.toLocaleString('ru-RU')} ₽</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Осталось:</span>
-              <span className="info-value">{(post.amount - (post.collected || 0)).toLocaleString('ru-RU')} ₽</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Прогресс:</span>
-              <div className="amount-display" style={{ '--progress-width': `${progress}%` }}>
-                <div className="amount-display-content">
-                  <span className="amount-display-collected">{(post.collected || 0).toLocaleString('ru-RU')}</span>
-                  <span className="amount-display-separator">/</span>
-                  <span className="amount-display-target">{post.amount.toLocaleString('ru-RU')}</span>
-                  <span className="amount-display-currency">₽</span>
-                </div>
-              </div>
+          <div className="amount-display" style={{ '--progress-width': `${progress}%` }}>
+            <div className="amount-display-content">
+              <span className="amount-display-collected">{(post.collected || 0).toLocaleString('ru-RU')}</span>
+              <span className="amount-display-target">{post.amount.toLocaleString('ru-RU')}</span>
             </div>
           </div>
         </div>
